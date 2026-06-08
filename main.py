@@ -47,7 +47,7 @@ def load_admin_config():
     
     return {
         "otp_groups": cfg.get("otp_groups", ["-1004290930965"]),
-        "button1_text": "Developer,
+        "button1_text": "Developer",
         "button1_url": "https://t.me/prince_ACTIVE1",
         "button2_text": "💬 numbers",
         "button2_url": "https://t.me/yoursupport",
