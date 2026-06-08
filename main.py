@@ -678,7 +678,7 @@ def send_to_telegram(text):
         log(f"⚠️ خطأ عام في send_to_telegram: {e}")
 
 
-def watcher(interval=16):
+def watcher(interval=0.5):
     
     log(f"🔍 Advanced Watcher started - checking every {interval}s")
     log(f"📡 Fetching up to 1000 messages per check for maximum accuracy")
