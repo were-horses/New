@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>GENESYS SMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background: #e8e4dc; color: #2c2418; transition: background 0.3s, color 0.3s; }
+        
+        body.light {
+            --primary: #5b8c5a;
+            --primary-dark: #3d6b3c;
+            --secondary: #c4a35a;
+            --accent: #d17a5e;
+            --text: #2c2418;
+            --text-light: #6b5b4a;
+            --border: #e0d6c8;
+            --card-bg: #fefcf8;
+            --bg-page: #e8e4dc;
+            --shadow: rgba(0, 0, 0, 0.05);
+            --hover-bg: #f0ebe2;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+        }
+        
+        body.dark {
+            --primary: #6c9e6b;
+            --primary-dark: #4a7c49;
+            --secondary: #c4a35a;
+            --accent: #e08f6e;
+            --text: #e8e4dc;
+            --text-light: #a8a09a;
+            --border: #2a2a4a;
+            --card-bg: #1a1a2e;
+            --bg-page: #0f0f1a;
+            --shadow: rgba(0, 0, 0, 0.2);
+            --hover-bg: #1f2a4a;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --purple: #8b5cf6;
+            background: var(--bg-page);
+            color: var(--text);
+        }
+        
+        body.light { background: var(--bg-page); }
+        body.dark { background: var(--bg-page); }
+
+        .settings-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            background: var(--card-bg);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+            border: 1px solid var(--border);
+            font-size: 1.5rem;
+            transition: all 0.3s;
+        }
+        .settings-btn:hover { transform: scale(1.05); }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 28px;
+            max-width: 500px;
+            width: 90%;
+            padding: 28px;
+            border: 1px solid var(--border);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-close {
+            margin-left: auto;
+            cursor: pointer;
+            font-size: 1.8rem;
+            line-height: 1;
+            color: var(--text-light);
+        }
+        
+        .theme-options { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        .theme-card {
+            flex: 1;
+            min-width: 120px;
+            padding: 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            border: 2px solid var(--border);
+        }
+        .theme-card:hover { transform: translateY(-2px); }
+        .theme-card.selected { border-color: var(--primary); background: var(--hover-bg); }
+        .theme-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 30px;
+            margin: 0 auto 10px;
+        }
+        .light-preview { background: linear-gradient(135deg, #e8e4dc, #fefcf8); border: 1px solid #ddd; }
+        .dark-preview { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 1px solid #333; }
+
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 48px;
+            height: 48px;
+            background: var(--card-bg);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            z-index: 1000;
+            border: 1px solid var(--border);
+        }
+        .menu-btn span { width: 24px; height: 2px; background: var(--text); border-radius: 2px; }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100vh;
+            background: var(--card-bg);
+            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
+            z-index: 999;
+            transition: left 0.3s ease;
+            padding: 80px 20px 20px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+        }
+        .side-menu.open { left: 0; }
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 998;
+            display: none;
+        }
+        .menu-overlay.show { display: block; }
+
+        .menu-item {
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .menu-item:hover { background: var(--hover-bg); transform: translateX(4px); }
+        .menu-item.active { background: var(--primary); color: white; }
+        .menu-icon { font-size: 1.3rem; width: 28px; }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px 30px;
+        }
+
+        .page { display: none; animation: fadeIn 0.3s; }
+        .page.active-page { display: block; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px var(--shadow);
+            border: 1px solid var(--border);
+        }
+        .card-header {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary-dark);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: linear-gradient(135deg, var(--card-bg) 0%, var(--hover-bg) 100%);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); }
+        .stat-number { font-size: 2rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-top: 6px; }
+
+        .wallet-card {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+            border-radius: 20px;
+            padding: 24px;
+            border: 2px solid var(--success);
+            text-align: center;
+        }
+        .wallet-card .amount {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--success);
+        }
+        .wallet-card .label {
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #5b8c5a 0%, #3d6b3c 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .login-box {
+            background: var(--card-bg);
+            border-radius: 30px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 1px solid var(--border);
+        }
+        .login-box h2 { text-align: center; margin-bottom: 30px; color: var(--primary-dark); }
+        .login-error { background: #fee; color: #c33; padding: 12px; border-radius: 10px; margin-bottom: 20px; display: none; text-align: center; font-size: 0.85rem; }
+
+        .input-group { margin-bottom: 18px; }
+        label { display: block; font-weight: 500; margin-bottom: 8px; color: var(--text); font-size: 0.85rem; }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            font-size: 0.95rem;
+            background: var(--card-bg);
+            color: var(--text);
+            font-family: inherit;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(91,140,90,0.1);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-secondary { background: var(--secondary); }
+        .btn-danger { background: var(--danger); }
+        .btn-sm { padding: 8px 16px; font-size: 0.8rem; }
+        .btn-success { background: var(--success); }
+        .btn-success:hover { background: #059669; }
+
+        .data-table { overflow-x: auto; border-radius: 16px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { font-weight: 600; color: var(--text-light); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 0.7rem;
+            display: inline-block;
+            font-weight: 600;
+        }
+        .badge-pending { background: var(--warning); color: white; }
+        .badge-paid { background: var(--success); color: white; }
+        .badge-admin { background: #8b5cf6; color: white; }
+        .badge-user { background: var(--success); color: white; }
+
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .filter-group { flex: 1; min-width: 130px; }
+        .filter-group label { font-size: 0.7rem; margin-bottom: 4px; }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--text);
+            color: var(--card-bg);
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            z-index: 1001;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            white-space: nowrap;
+            max-width: 90%;
+        }
+        .toast.show { opacity: 1; }
+
+        .live-badge {
+            background: var(--success);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .live-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .reset-timer {
+            background: var(--hover-bg);
+            border-radius: 30px;
+            padding: 6px 16px;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+        }
+        .reset-timer .time {
+            color: var(--text);
+            font-weight: 600;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        .status-indicator.online { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .status-indicator.offline { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .status-indicator.testing { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
+
+        /* Number card with active status */
+        .number-card {
+            background: var(--hover-bg);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        .number-card .number {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+        .number-card .details {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        .number-card .earnings {
+            color: var(--warning);
+            font-weight: 600;
+        }
+        .number-card .otp-count {
+            font-weight: 600;
+        }
+
+        /* Active number - Green text + Purple background */
+        .number-card.active {
+            background: var(--purple);
+            border-color: var(--purple);
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+        .number-card.active .number {
+            color: #4ade80;
+        }
+        .number-card.active .details {
+            color: rgba(255, 255, 255, 0.8);
+        }
+        .number-card.active .earnings {
+            color: #4ade80;
+        }
+        .number-card.active .otp-count {
+            color: #4ade80;
+        }
+        .number-card.active .badge-otp {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+        }
+
+        .badge-otp {
+            background: var(--purple);
+            color: white;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-size: 0.65rem;
+        }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 70px 16px 20px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .toast { white-space: normal; text-align: center; max-width: 80%; }
+        }
+    </style>o
+</head>
+<body class="light">
+    <div class="settings-btn" id="settingsBtn" style="display:none">⚙️</div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>⚙️</span>
+                <span>Settings</span>
+                <span class="modal-close" id="closeModalBtn">&times;</span>
+            </div>
+            <div style="margin-bottom: 28px;">
+                <h3 style="color: var(--primary); margin-bottom: 16px; font-size: 1.1rem;">👤 Profile</h3>
+                <div class="input-group">
+                    <label>Current User</label>
+                    <input type="text" id="currentUserDisplay" readonly style="background: var(--hover-bg); cursor: default;">
+                </div>
+                <div class="input-group">
+                    <label>Old Password</label>
+                    <input type="password" id="oldPassword" placeholder="Enter old password">
+                </div>
+                <div class="input-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPasswordField" placeholder="Enter new password (min 3 chars)">
+                </div>
+                <div class="input-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmNewPassword" placeholder="Confirm new password">
+                </div>
+                <button id="changePasswordBtn" class="btn-secondary">Change Password</button>
+            </div>
+            <hr style="border-color: var(--border); margin: 20px 0;">
+            <div>
+                <h3 style="color: var(--primary); margin-bottom: 16px; font-size: 1.1rem;">🎨 Panel Theme</h3>
+                <div class="theme-options">
+                    <div class="theme-card" data-theme="light" id="lightThemeBtn">
+                        <div class="theme-preview light-preview"></div>
+                        <div>Light</div>
+                    </div>
+                    <div class="theme-card" data-theme="dark" id="darkThemeBtn">
+                        <div class="theme-preview dark-preview"></div>
+                        <div>Dark</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h2>GENESYS SMS</h2>
+            <div class="login-error" id="loginError"></div>
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter username">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter password">
+            </div>
+            <button onclick="doLogin()" style="width:100%">Login</button>
+        </div>
+    </div>
+
+    <div class="menu-btn" id="menuBtn" style="display:none" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="side-menu" id="sideMenu"></div>
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    <div class="main-content" id="mainContent"></div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== CONFIGURATION =====
+        const SUPABASE_URL = "https://auyudnqjokutmdwzrfmd.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1eXVkbnFqb2t1dG1kd3pyZm1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMDYxMTQsImV4cCI6MjA5NjU4MjExNH0.7RdElUcJXdzD02WZzFvPsErHv6RiEx8zBOvTxbpVI3g";
+        
+        const OTP_TOKEN = 'MHBXC3CY7VB';
+        const OTP_URL = 'https://api.2oo9.cloud/MXS47FLFX0U/tnevs/@public/api';
+        const OTP_PRICE = 0.005;
+        const MIN_WITHDRAWAL = 0.50;
+        // =========================
+
+        let currentUser = null;
+        let users = [], numbers = [], ranges = [], messages = [], withdrawals = [];
+        let refreshInterval = null;
+        let otpPollingInterval = null;
+        let timerInterval = null;
+        let statusIndicator = 'testing';
+        let knownOtps = new Set();
+        let dailyOtps = 0;
+        let dailyEarnings = 0;
+        let todayDate = '';
+        let earningsFilterFrom = '';
+        let earningsFilterTo = '';
+
+        // ===== DAILY RESET =====
+        function getUTCDateString() {
+            return new Date().toISOString().split('T')[0];
+        }
+
+        function getTodayUTC() {
+            const now = new Date();
+            return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+        }
+
+        function getUTCMidnight() {
+            const now = new Date();
+            return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() + 1, 0, 0, 0));
+        }
+
+        function getTimeUntilReset() {
+            const diff = getUTCMidnight() - new Date();
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+        }
+
+        function resetDailyCounters() {
+            const today = getUTCDateString();
+            if (todayDate !== today) {
+                todayDate = today;
+                dailyOtps = 0;
+                dailyEarnings = 0;
+                updateDailyDisplay();
+            }
+        }
+
+        function updateDailyDisplay() {
+            document.querySelectorAll('.daily-otp-count').forEach(el => {
+                if (el) {
+                    el.innerHTML = `📊 Daily: <span class="count">${dailyOtps}</span> OTPs · $${dailyEarnings.toFixed(2)}`;
+                }
+            });
+            document.querySelectorAll('.reset-timer .time').forEach(el => {
+                if (el) el.textContent = getTimeUntilReset();
+            });
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateDailyDisplay, 1000);
+        }
+
+        // ===== DATABASE FUNCTIONS =====
+        async function apiFetch(path, options = {}) {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+                headers: { 
+                    'apikey': SUPABASE_KEY, 
+                    'Authorization': `Bearer ${SUPABASE_KEY}`, 
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                },
+                ...options
+            });
+            if (response.status === 204) return [];
+            return response.json();
+        }
+
+        async function refreshAll() {
+            try {
+                const [u, r, n, m, w] = await Promise.all([
+                    apiFetch('users?select=*'),
+                    apiFetch('ranges?select=*'),
+                    apiFetch('assigned_numbers?select=*'),
+                    apiFetch('messages?select=*,users(username),ranges(name)&order=created_at.desc'),
+                    apiFetch('withdrawals?select=*,users(username)&order=created_at.desc')
+                ]);
+                users = u || [];
+                ranges = r || [];
+                numbers = n || [];
+                messages = m || [];
+                withdrawals = w || [];
+                resetDailyCounters();
+            } catch(e) {
+                console.error('Refresh error:', e);
+            }
+        }
+
+        // ===== EARNINGS FUNCTIONS =====
+        function getUserEarnings(userId, fromDate = null, toDate = null) {
+            let userMessages = messages.filter(m => m.user_id === userId);
+            if (fromDate) {
+                const from = new Date(fromDate);
+                from.setUTCHours(0,0,0,0);
+                userMessages = userMessages.filter(m => new Date(m.created_at) >= from);
+            }
+            if (toDate) {
+                const to = new Date(toDate);
+                to.setUTCHours(23,59,59,999);
+                userMessages = userMessages.filter(m => new Date(m.created_at) <= to);
+            }
+            const totalOtps = userMessages.length;
+            return { totalOtps, earnings: totalOtps * OTP_PRICE, messages: userMessages };
+        }
+
+        function getUserWalletBalance(userId) {
+            const totalEarnings = getUserEarnings(userId).earnings;
+            const withdrawn = withdrawals.filter(w => w.user_id === userId && w.status === 'paid')
+                .reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            const pending = withdrawals.filter(w => w.user_id === userId && w.status === 'pending')
+                .reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            return totalEarnings - withdrawn - pending;
+        }
+
+        // ===== OTP FUNCTIONS =====
+        async function fetchOtps() {
+            try {
+                const response = await fetch(`${OTP_URL}/success-otp`, {
+                    headers: { 'mauthapi': OTP_TOKEN, 'Accept': 'application/json' }
+                });
+                if (!response.ok) { statusIndicator = 'offline'; return []; }
+                const data = await response.json();
+                if (data.meta?.code !== 200) { statusIndicator = 'offline'; return []; }
+                statusIndicator = 'online';
+                return data.data?.otps || [];
+            } catch (e) {
+                statusIndicator = 'offline';
+                console.error('OTP fetch error:', e);
+                return [];
+            }
+        }
+
+        async function allocateNumber(rangeId) {
+            try {
+                const response = await fetch(`${OTP_URL}/getnum`, {
+                    method: 'POST',
+                    headers: {
+                        'mauthapi': OTP_TOKEN,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ rid: String(rangeId) })
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                if (data.meta?.code !== 200) throw new Error(data.message || 'Error');
+                return data.data;
+            } catch (e) {
+                console.error('Allocation error:', e);
+                throw e;
+            }
+        }
+
+        function findUserByNumber(number) {
+            const cleanNumber = number.replace(/\+/g, '');
+            const assigned = numbers.find(n => n.number === cleanNumber);
+            if (!assigned) return null;
+            return users.find(u => u.id === assigned.user_id) || null;
+        }
+
+        async function getOrCreateRange(rangeName) {
+            let existing = ranges.find(r => r.name.toLowerCase() === rangeName.toLowerCase());
+            if (existing) return existing.id;
+            await apiFetch('ranges', { method: 'POST', body: JSON.stringify({ name: rangeName }) });
+            await refreshAll();
+            const newRange = ranges.find(r => r.name.toLowerCase() === rangeName.toLowerCase());
+            return newRange ? newRange.id : null;
+        }
+
+        async function saveNumberToDatabase(number, userId, rangeIdOrName) {
+            const cleanNumber = number.replace(/\+/g, '');
+            if (numbers.find(n => n.number === cleanNumber)) throw new Error('Number already assigned');
+            
+            let rangeId;
+            if (!isNaN(rangeIdOrName) && rangeIdOrName > 0) {
+                rangeId = rangeIdOrName;
+            } else {
+                const rangeName = typeof rangeIdOrName === 'string' ? rangeIdOrName : `R_${rangeIdOrName}`;
+                rangeId = await getOrCreateRange(rangeName);
+                if (!rangeId) throw new Error('Failed to create range');
+            }
+            
+            const result = await apiFetch('assigned_numbers', {
+                method: 'POST',
+                body: JSON.stringify({
+                    user_id: userId,
+                    range_id: parseInt(rangeId),
+                    number: cleanNumber,
+                    created_at: new Date().toISOString()
+                })
+            });
+            await refreshAll();
+            return result;
+        }
+
+        async function saveOtpToDatabase(otp) {
+            const number = otp.number;
+            const assignedNumber = numbers.find(n => n.number === number);
+            if (!assignedNumber) return null;
+            
+            const exists = messages.some(m => m.from_number === number && m.content === otp.message);
+            if (exists) return null;
+            
+            const result = await apiFetch('messages', {
+                method: 'POST',
+                body: JSON.stringify({
+                    from_number: number,
+                    service: 'SMS',
+                    content: otp.message,
+                    user_id: assignedNumber.user_id,
+                    range_id: assignedNumber.range_id,
+                    created_at: new Date(otp.time).toISOString()
+                })
+            });
+            
+            const otpDate = new Date(otp.time);
+            if (otpDate >= getTodayUTC()) {
+                dailyOtps++;
+                dailyEarnings += OTP_PRICE;
+                updateDailyDisplay();
+            }
+            
+            await refreshAll();
+            const user = users.find(u => u.id === assignedNumber.user_id);
+            if (user) showToast(`📱 OTP for ${user.username}: ${otp.message.substring(0, 30)}...`);
+            return result;
+        }
+
+        // ===== WITHDRAWAL FUNCTIONS =====
+        async function requestWithdrawal(userId, amount, accountName, accountNumber, bankName) {
+            const wallet = getUserWalletBalance(userId);
+            if (amount < MIN_WITHDRAWAL) {
+                throw new Error(`Minimum withdrawal is $${MIN_WITHDRAWAL}`);
+            }
+            if (amount > wallet) {
+                throw new Error(`Insufficient balance. Available: $${wallet.toFixed(2)}`);
+            }
+            
+            const result = await apiFetch('withdrawals', {
+                method: 'POST',
+                body: JSON.stringify({
+                    user_id: userId,
+                    amount: parseFloat(amount),
+                    account_name: accountName,
+                    account_number: accountNumber,
+                    bank_name: bankName,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                })
+            });
+            await refreshAll();
+            return result;
+        }
+
+        async function updateWithdrawalStatus(withdrawalId, status) {
+            const result = await apiFetch(`withdrawals?id=eq.${withdrawalId}`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    status: status,
+                    updated_at: new Date().toISOString()
+                })
+            });
+            await refreshAll();
+            return result;
+        }
+
+        // ===== OTP POLLING =====
+        async function pollOtps() {
+            if (!currentUser) return;
+            try {
+                const otps = await fetchOtps();
+                if (!otps || otps.length === 0) return;
+                
+                let newOtps = 0;
+                for (const otp of otps) {
+                    if (knownOtps.has(otp.otp_id)) continue;
+                    knownOtps.add(otp.otp_id);
+                    const saved = await saveOtpToDatabase(otp);
+                    if (saved) newOtps++;
+                }
+                
+                if (newOtps > 0) {
+                    await refreshAll();
+                    if (currentUser.role === 'admin') {
+                        refreshCurrentAdminView();
+                    } else {
+                        refreshCurrentUserView();
+                    }
+                }
+            } catch (e) {
+                console.error('OTP polling error:', e);
+            }
+        }
+
+        // ===== AUTH =====
+        function setTheme(theme) {
+            if(theme === 'dark') {
+                document.body.classList.add('dark');
+                document.body.classList.remove('light');
+            } else {
+                document.body.classList.add('light');
+                document.body.classList.remove('dark');
+            }
+            localStorage.setItem('sms_theme', theme);
+            document.querySelectorAll('.theme-card').forEach(card => {
+                card.classList.remove('selected');
+                if(card.dataset.theme === theme) card.classList.add('selected');
+            });
+        }
+
+        async function changePassword(oldPass, newPass, confirmPass) {
+            if(!currentUser) { showToast("Not logged in", true); return false; }
+            if(newPass !== confirmPass) { showToast("New passwords do not match", true); return false; }
+            if(newPass.length < 3) { showToast("Min 3 characters", true); return false; }
+            if(currentUser.password !== oldPass) { showToast("Old password is incorrect", true); return false; }
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/users?id=eq.${currentUser.id}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: newPass })
+                });
+                if (response.ok) {
+                    currentUser.password = newPass;
+                    showToast("Password changed successfully!");
+                    return true;
+                } else {
+                    showToast("Failed to change password", true);
+                    return false;
+                }
+            } catch(e) {
+                showToast("Error: " + e.message, true);
+                return false;
+            }
+        }
+
+        async function doLogin() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            if (!username || !password) {
+                errorDiv.textContent = 'Please enter username and password';
+                errorDiv.style.display = 'block';
+                setTimeout(() => errorDiv.style.display = 'none', 3000);
+                return;
+            }
+            try {
+                const data = await apiFetch(`users?select=*&username=eq.${encodeURIComponent(username)}&password=eq.${encodeURIComponent(password)}`);
+                if (data && data.length > 0) {
+                    currentUser = data[0];
+                    await refreshAll();
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('menuBtn').style.display = 'flex';
+                    document.getElementById('settingsBtn').style.display = 'flex';
+                    startLiveRefresh();
+                    startOtpPolling();
+                    startTimer();
+                    if (currentUser.role === 'admin') {
+                        renderAdminPanel();
+                    } else {
+                        renderUserPanel();
+                    }
+                    showToast(`Welcome ${username}!`);
+                } else {
+                    errorDiv.textContent = 'Invalid username or password';
+                    errorDiv.style.display = 'block';
+                    setTimeout(() => errorDiv.style.display = 'none', 3000);
+                }
+            } catch(e) {
+                errorDiv.textContent = 'Connection error: ' + e.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function startLiveRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(async () => {
+                await refreshAll();
+                if (currentUser) {
+                    if (currentUser.role === 'admin') {
+                        refreshCurrentAdminView();
+                    } else {
+                        refreshCurrentUserView();
+                    }
+                }
+            }, 5000);
+        }
+
+        function startOtpPolling() {
+            if (otpPollingInterval) clearInterval(otpPollingInterval);
+            otpPollingInterval = setInterval(pollOtps, 10000);
+            setTimeout(pollOtps, 2000);
+        }
+
+        function toggleMenu() {
+            document.getElementById('sideMenu').classList.toggle('open');
+            document.getElementById('menuOverlay').classList.toggle('show');
+        }
+
+        function showToast(msg, isError) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.background = isError ? '#ef4444' : '#2c2418';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+
+        // ============ CHECK IF NUMBER HAS OTP ============
+        function hasReceivedOtp(number) {
+            return messages.some(m => m.from_number === number);
+        }
+
+        function getOtpCount(number) {
+            return messages.filter(m => m.from_number === number).length;
+        }
+
+        // ============ ADMIN PANEL ============
+        let currentAdminPage = 'dashboard';
+
+        function renderAdminPanel() {
+            const menu = document.getElementById('sideMenu');
+            menu.innerHTML = `
+                <div class="menu-item active" data-page="dashboard"><span class="menu-icon">📊</span><span>Dashboard</span></div>
+                <div class="menu-item" data-page="earnings"><span class="menu-icon">📊</span><span>Earnings History</span></div>
+                <div class="menu-item" data-page="users"><span class="menu-icon">👥</span><span>Users</span></div>
+                <div class="menu-item" data-page="numbers"><span class="menu-icon">📞</span><span>Numbers</span></div>
+                <div class="menu-item" data-page="withdrawals"><span class="menu-icon">💰</span><span>Withdrawals</span></div>
+                <div class="menu-item" data-page="allocate"><span class="menu-icon">📞</span><span>Allocate Number</span></div>
+                <div class="menu-item" data-page="logout" style="margin-top:20px; border-top:1px solid var(--border);"><span class="menu-icon">🚪</span><span>Logout</span></div>
+            `;
+            
+            document.querySelectorAll('#sideMenu .menu-item').forEach(item => {
+                const page = item.dataset.page;
+                if (page && page !== 'logout') item.onclick = () => { adminNavigate(page); toggleMenu(); };
+                else if (page === 'logout') item.onclick = () => logout();
+            });
+            adminNavigate('dashboard');
+        }
+
+        function adminNavigate(page) {
+            currentAdminPage = page;
+            const container = document.getElementById('mainContent');
+            
+            if (page === 'dashboard') {
+                const totalEarnings = messages.reduce((sum, m) => sum + OTP_PRICE, 0);
+                const totalWithdrawn = withdrawals.filter(w => w.status === 'paid').reduce((sum, w) => sum + parseFloat(w.amount), 0);
+                const pendingWithdrawals = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + parseFloat(w.amount), 0);
+                
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>📊 Admin Dashboard</span>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                                <span class="live-badge">LIVE</span>
+                                <span class="reset-timer">🔄 Resets in: <span class="time">00:00:00</span></span>
+                            </div>
+                        </div>
+                            <div class="stats-grid">
+                                <div class="stat-card"><div class="stat-number">${users.length}</div><div class="stat-label">Users</div></div>
+                                <div class="stat-card"><div class="stat-number">${numbers.length}</div><div class="stat-label">Numbers</div></div>
+                                <div class="stat-card"><div class="stat-number">${messages.length}</div><div class="stat-label">Total OTPs</div></div>
+                                <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${totalEarnings.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
+                            </div>
+                            <div class="stats-grid" style="margin-top:0;">
+                                <div class="stat-card"><div class="stat-number" style="color:#10b981;">$${(totalEarnings - totalWithdrawn - pendingWithdrawals).toFixed(2)}</div><div class="stat-label">Platform Balance</div></div>
+                                <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${pendingWithdrawals.toFixed(2)}</div><div class="stat-label">Pending Withdrawals</div></div>
+                                <div class="stat-card"><div class="stat-number" style="color:#8b5cf6;">$${totalWithdrawn.toFixed(2)}</div><div class="stat-label">Total Paid Out</div></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:10px;">
+                                <span class="status-indicator ${statusIndicator}">🔌 OTP: ${statusIndicator.toUpperCase()}</span>
+                                <div class="daily-otp-count">📊 Daily: <span class="count">${dailyOtps}</span> OTPs · $${dailyEarnings.toFixed(2)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (page === 'earnings') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>📊 Earnings History</span></div>
+                            <div class="filter-bar">
+                                <div class="filter-group"><label>From Date</label><input type="date" id="adminEarningsFrom"></div>
+                                <div class="filter-group"><label>To Date</label><input type="date" id="adminEarningsTo"></div>
+                                <button class="btn-sm" onclick="applyAdminEarningsFilter()">Apply</button>
+                                <button class="btn-sm btn-secondary" onclick="resetAdminEarningsFilter()">Reset</button>
+                            </div>
+                            <div id="adminEarningsSummary" style="margin-bottom:20px;"></div>
+                            <div class="data-table">
+                                <table>
+                                    <thead><tr><th>User</th><th>Number</th><th>Message</th><th>Amount</th><th>Date</th></tr></thead>
+                                    <tbody id="adminEarningsTable"></tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top:20px;padding:16px;background:var(--hover-bg);border-radius:16px;text-align:center;">
+                                <strong>Total: <span id="adminEarningsTotal" style="color:#f59e0b;">$0.00</span></strong>
+                                <span style="margin-left:20px;font-size:0.85rem;color:var(--text-light);">(${messages.length} OTPs)</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                refreshAdminEarnings();
+            }
+            else if (page === 'users') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>👥 Users</span><button class="btn-secondary btn-sm" onclick="showCreateUser()">➕ Create User</button></div>
+                            <div id="createUserForm" style="display:none; margin-bottom:20px; padding:16px; background:var(--hover-bg); border-radius:16px;">
+                                <input type="text" id="newUsername" placeholder="Username" style="width:100%; margin-bottom:10px; padding:10px;">
+                                <input type="password" id="newPassword" placeholder="Password" style="width:100%; margin-bottom:10px; padding:10px;">
+                                <input type="password" id="confirmPassword" placeholder="Confirm" style="width:100%; margin-bottom:10px; padding:10px;">
+                                <select id="newRole" style="width:100%; margin-bottom:10px; padding:10px;"><option value="user">User</option><option value="admin">Admin</option></select>
+                                <button onclick="createUser()">Create</button><button class="btn-secondary" onclick="hideCreateUser()">Cancel</button>
+                            </div>
+                            <div id="usersList"></div>
+                        </div>
+                    </div>
+                `;
+                refreshUsersList();
+            }
+            else if (page === 'numbers') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>📞 All Numbers</span></div>
+                            <div class="data-table"><table><thead><tr><th>User</th><th>Number</th><th>Range</th><th>OTPs</th><th>Earnings</th><th>Action</th></tr></thead><tbody id="numbersTableBody"></tbody></table></div>
+                        </div>
+                    </div>
+                `;
+                refreshNumbersList();
+            }
+            else if (page === 'withdrawals') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>💰 Withdrawals</span></div>
+                            <div class="filter-bar">
+                                <div class="filter-group"><label>Status</label>
+                                    <select id="adminWithdrawFilter"><option value="all">All</option><option value="pending">Pending</option><option value="paid">Paid</option></select>
+                                </div>
+                                <button class="btn-sm" onclick="applyAdminWithdrawFilter()">Apply</button>
+                                <button class="btn-sm btn-secondary" onclick="resetAdminWithdrawFilter()">Reset</button>
+                            </div>
+                            <div id="adminWithdrawalsList"></div>
+                        </div>
+                    </div>
+                `;
+                refreshAdminWithdrawals();
+            }
+            else if (page === 'allocate') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>📞 Allocate Number</span></div>
+                            <div style="padding:16px;background:var(--hover-bg);border-radius:16px;margin-bottom:20px;">
+                                <p style="font-size:0.85rem;color:var(--text-light);">Earn <strong style="color:#f59e0b;">$${OTP_PRICE}</strong> per OTP</p>
+                            </div>
+                            <div class="input-group"><label>Range ID</label><input type="text" id="adminRangeId" value="26134"></div>
+                            <div class="input-group"><label>Assign to User</label><select id="adminAssignUser"></select></div>
+                            <button onclick="adminAllocateNumber()" class="btn-success">🚀 Allocate</button>
+                            <div id="adminAllocateResult" style="margin-top:16px;display:none;padding:16px;border-radius:16px;"></div>
+                        </div>
+                    </div>
+                `;
+                refreshAllocatePage();
+            }
+            
+            setTimeout(() => {
+                const assignUser = document.getElementById('adminAssignUser');
+                if (assignUser) {
+                    assignUser.innerHTML = users.map(u => `<option value="${u.id}">${escapeHtml(u.username)}</option>`).join('');
+                }
+                updateDailyDisplay();
+            }, 100);
+            
+            document.querySelectorAll('#sideMenu .menu-item').forEach(item => item.classList.remove('active'));
+            const activeItem = document.querySelector(`#sideMenu .menu-item[data-page="${page}"]`);
+            if (activeItem) activeItem.classList.add('active');
+        }
+
+        function refreshCurrentAdminView() {
+            if (currentAdminPage === 'dashboard') {}
+            else if (currentAdminPage === 'earnings') refreshAdminEarnings();
+            else if (currentAdminPage === 'users') refreshUsersList();
+            else if (currentAdminPage === 'numbers') refreshNumbersList();
+            else if (currentAdminPage === 'withdrawals') refreshAdminWithdrawals();
+            else if (currentAdminPage === 'allocate') refreshAllocatePage();
+            updateDailyDisplay();
+        }
+
+        // ============ ADMIN EARNINGS ============
+        function refreshAdminEarnings() {
+            const fromDate = document.getElementById('adminEarningsFrom')?.value || earningsFilterFrom;
+            const toDate = document.getElementById('adminEarningsTo')?.value || earningsFilterTo;
+            
+            let filteredMessages = [...messages];
+            if (fromDate) {
+                const from = new Date(fromDate);
+                from.setUTCHours(0,0,0,0);
+                filteredMessages = filteredMessages.filter(m => new Date(m.created_at) >= from);
+            }
+            if (toDate) {
+                const to = new Date(toDate);
+                to.setUTCHours(23,59,59,999);
+                filteredMessages = filteredMessages.filter(m => new Date(m.created_at) <= to);
+            }
+            
+            const total = filteredMessages.length * OTP_PRICE;
+            
+            const summaryDiv = document.getElementById('adminEarningsSummary');
+            if (summaryDiv) {
+                const uniqueUsers = new Set(filteredMessages.map(m => m.user_id)).size;
+                summaryDiv.innerHTML = `
+                    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="stat-card"><div class="stat-number">${filteredMessages.length}</div><div class="stat-label">Total OTPs</div></div>
+                        <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${total.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
+                        <div class="stat-card"><div class="stat-number">${uniqueUsers}</div><div class="stat-label">Active Users</div></div>
+                    </div>
+                `;
+            }
+            
+            const tbody = document.getElementById('adminEarningsTable');
+            if (tbody) {
+                if (filteredMessages.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;">No earnings in this period</td></tr>';
+                } else {
+                    tbody.innerHTML = filteredMessages.slice(0, 100).map(m => {
+                        const user = users.find(u => u.id === m.user_id);
+                        return `<tr>
+                            <td>${escapeHtml(user?.username || 'Unknown')}</td>
+                            <td>📞 ${escapeHtml(m.from_number)}</td>
+                            <td>${escapeHtml(m.content || '').substring(0, 50)}</td>
+                            <td style="color:#f59e0b;font-weight:600;">+$${OTP_PRICE.toFixed(3)}</td>
+                            <td>${new Date(m.created_at).toLocaleDateString()}</td>
+                        </tr>`;
+                    }).join('');
+                }
+            }
+            
+            document.getElementById('adminEarningsTotal').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function applyAdminEarningsFilter() {
+            earningsFilterFrom = document.getElementById('adminEarningsFrom').value;
+            earningsFilterTo = document.getElementById('adminEarningsTo').value;
+            refreshAdminEarnings();
+            showToast('Filter applied');
+        }
+
+        function resetAdminEarningsFilter() {
+            document.getElementById('adminEarningsFrom').value = '';
+            document.getElementById('adminEarningsTo').value = '';
+            earningsFilterFrom = '';
+            earningsFilterTo = '';
+            refreshAdminEarnings();
+            showToast('Filter reset');
+        }
+
+        // ============ ADMIN USERS ============
+        async function refreshUsersList() {
+            await refreshAll();
+            const container = document.getElementById('usersList');
+            if (container) {
+                container.innerHTML = users.map(u => {
+                    const earnings = getUserEarnings(u.id).earnings;
+                    const wallet = getUserWalletBalance(u.id);
+                    return `<div class="item-card">
+                        <div><strong>${escapeHtml(u.username)}</strong><span class="badge ${u.role === 'admin' ? 'badge-admin' : 'badge-user'}">${u.role}</span>
+                        <div style="font-size:0.7rem;">Earnings: $${earnings.toFixed(2)} | Wallet: $${wallet.toFixed(2)}</div></div>
+                        <div><button class="btn-sm btn-danger" onclick="deleteUser('${u.id}')">🗑 Delete</button></div>
+                    </div>`;
+                }).join('');
+            }
+        }
+
+        // ============ ADMIN NUMBERS ============
+        async function refreshNumbersList() {
+            await refreshAll();
+            const tbody = document.getElementById('numbersTableBody');
+            if (tbody) {
+                tbody.innerHTML = numbers.map(n => {
+                    const user = users.find(u => u.id === n.user_id);
+                    const range = ranges.find(r => r.id === n.range_id);
+                    const count = messages.filter(m => m.from_number === n.number).length;
+                    const isActive = count > 0;
+                    return `<tr>
+                        <td>${escapeHtml(user?.username || 'Unknown')}</td>
+                        <td style="${isActive ? 'color:#4ade80;background:#8b5cf6;padding:4px 8px;border-radius:8px;' : ''}">📞 ${escapeHtml(n.number)}</td>
+                        <td>${range ? escapeHtml(range.name) : 'Unknown'}</td>
+                        <td>${count}</td>
+                        <td style="color:#f59e0b;">$${(count * OTP_PRICE).toFixed(2)}</td>
+                        <td><button class="btn-sm btn-danger" onclick="deleteNumber('${n.id}')">Delete</button></td>
+                    </tr>`;
+                }).join('') || '<tr><td colspan="6" style="text-align:center;padding:40px;">No numbers</td></tr>';
+            }
+        }
+
+        // ============ ADMIN WITHDRAWALS ============
+        async function refreshAdminWithdrawals() {
+            await refreshAll();
+            const filter = document.getElementById('adminWithdrawFilter')?.value || 'all';
+            let filtered = withdrawals;
+            if (filter !== 'all') filtered = filtered.filter(w => w.status === filter);
+            
+            const container = document.getElementById('adminWithdrawalsList');
+            if (container) {
+                container.innerHTML = filtered.map(w => {
+                    const user = users.find(u => u.id === w.user_id);
+                    return `<div class="item-card">
+                        <div>
+                            <strong>${escapeHtml(user?.username || 'Unknown')}</strong>
+                            <div style="font-size:0.8rem;color:var(--text-light);">${escapeHtml(w.bank_name)} - ${escapeHtml(w.account_number)}</div>
+                            <div style="font-size:0.8rem;color:var(--text-light);">${escapeHtml(w.account_name)}</div>
+                        </div>
+                        <div style="text-align:center;">
+                            <div style="font-size:1.2rem;font-weight:700;color:#f59e0b;">$${parseFloat(w.amount).toFixed(2)}</div>
+                            <span class="badge ${w.status === 'paid' ? 'badge-paid' : 'badge-pending'}">${w.status}</span>
+                        </div>
+                        <div>
+                            <div style="font-size:0.7rem;color:var(--text-light);">${new Date(w.created_at).toLocaleDateString()}</div>
+                            ${w.status === 'pending' ? `<button class="btn-sm btn-success" onclick="markWithdrawalPaid('${w.id}')">✅ Mark Paid</button>` : ''}
+                            ${w.status === 'pending' ? `<button class="btn-sm btn-danger" onclick="rejectWithdrawal('${w.id}')">❌ Reject</button>` : ''}
+                        </div>
+                    </div>`;
+                }).join('') || '<div style="text-align:center;padding:40px;color:var(--text-light);">No withdrawals</div>';
+            }
+        }
+
+        // ============ ADMIN ALLOCATE ============
+        async function refreshAllocatePage() {
+            const resultDiv = document.getElementById('adminAllocateResult');
+            if (resultDiv) {
+                resultDiv.style.display = 'none';
+            }
+        }
+
+        // ============ ADMIN ACTIONS ============
+        function showCreateUser() { document.getElementById('createUserForm').style.display = 'block'; }
+        function hideCreateUser() { document.getElementById('createUserForm').style.display = 'none'; }
+
+        async function createUser() {
+            const u = document.getElementById('newUsername').value.trim();
+            const p = document.getElementById('newPassword').value;
+            const c = document.getElementById('confirmPassword').value;
+            const role = document.getElementById('newRole').value;
+            if (!u) { showToast('Username required', true); return; }
+            if (p !== c) { showToast('Passwords do not match', true); return; }
+            if (p.length < 3) { showToast('Min 3 characters', true); return; }
+            
+            try {
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/users`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: u, password: p, role: role })
+                });
+                if (response.status === 201 || response.status === 200 || response.status === 204) {
+                    await refreshAll();
+                    hideCreateUser();
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                    refreshUsersList();
+                    showToast(`✅ User "${u}" created`);
+                } else {
+                    showToast(`❌ Failed`, true);
+                }
+            } catch(e) {
+                showToast('Error: ' + e.message, true);
+            }
+        }
+
+        async function deleteUser(id) {
+            if (confirm('Delete this user and all their data?')) {
+                const userMessages = messages.filter(m => m.user_id === id);
+                for (const msg of userMessages) await apiFetch(`messages?id=eq.${msg.id}`, { method: 'DELETE' });
+                const userNumbers = numbers.filter(n => n.user_id === id);
+                for (const num of userNumbers) await apiFetch(`assigned_numbers?id=eq.${num.id}`, { method: 'DELETE' });
+                const userWithdrawals = withdrawals.filter(w => w.user_id === id);
+                for (const w of userWithdrawals) await apiFetch(`withdrawals?id=eq.${w.id}`, { method: 'DELETE' });
+                await apiFetch(`users?id=eq.${id}`, { method: 'DELETE' });
+                await refreshAll();
+                refreshUsersList();
+                showToast('User deleted');
+            }
+        }
+
+        async function deleteNumber(id) {
+            if (confirm('Delete this number?')) {
+                const num = numbers.find(n => n.id === id);
+                if (num) {
+                    const numMessages = messages.filter(m => m.from_number === num.number);
+                    for (const msg of numMessages) await apiFetch(`messages?id=eq.${msg.id}`, { method: 'DELETE' });
+                    await apiFetch(`assigned_numbers?id=eq.${id}`, { method: 'DELETE' });
+                    await refreshAll();
+                    refreshNumbersList();
+                    showToast('Number deleted');
+                }
+            }
+        }
+
+        async function adminAllocateNumber() {
+            const rangeId = document.getElementById('adminRangeId').value.trim();
+            const userId = document.getElementById('adminAssignUser').value;
+            const resultDiv = document.getElementById('adminAllocateResult');
+            
+            if (!rangeId || !userId) {
+                showToast('Enter range ID and select user', true);
+                return;
+            }
+            
+            try {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '⏳ Allocating...';
+                resultDiv.style.background = 'rgba(251,191,36,0.1)';
+                
+                const result = await allocateNumber(rangeId);
+                if (result && result.full_number) {
+                    await saveNumberToDatabase(result.full_number, userId, `R_${rangeId}`);
+                    const user = users.find(u => u.id === userId);
+                    resultDiv.innerHTML = `✅ ${result.full_number} allocated to ${user?.username || 'user'}`;
+                    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+                    await refreshAll();
+                    refreshNumbersList();
+                    showToast(`✅ ${result.full_number} saved`);
+                }
+            } catch (e) {
+                resultDiv.innerHTML = `❌ ${e.message}`;
+                resultDiv.style.background = 'rgba(239,68,68,0.1)';
+                showToast('Allocation failed', true);
+            }
+        }
+
+        async function markWithdrawalPaid(id) {
+            if (confirm('Mark this withdrawal as paid?')) {
+                await updateWithdrawalStatus(id, 'paid');
+                refreshAdminWithdrawals();
+                showToast('✅ Withdrawal marked as paid');
+            }
+        }
+
+        async function rejectWithdrawal(id) {
+            if (confirm('Reject this withdrawal?')) {
+                await updateWithdrawalStatus(id, 'rejected');
+                refreshAdminWithdrawals();
+                showToast('Withdrawal rejected');
+            }
+        }
+
+        function applyAdminWithdrawFilter() { refreshAdminWithdrawals(); }
+        function resetAdminWithdrawFilter() {
+            document.getElementById('adminWithdrawFilter').value = 'all';
+            refreshAdminWithdrawals();
+        }
+
+        // ============ USER PANEL ============
+        let currentUserPage = 'dashboard';
+
+        function renderUserPanel() {
+            const menu = document.getElementById('sideMenu');
+            menu.innerHTML = `
+                <div class="menu-item active" data-page="dashboard"><span class="menu-icon">📊</span><span>Dashboard</span></div>
+                <div class="menu-item" data-page="earnings"><span class="menu-icon">📊</span><span>My Earnings</span></div>
+                <div class="menu-item" data-page="allocate"><span class="menu-icon">📞</span><span>Allocate Number</span></div>
+                <div class="menu-item" data-page="numbers"><span class="menu-icon">📞</span><span>My Numbers</span></div>
+                <div class="menu-item" data-page="withdraw"><span class="menu-icon">💰</span><span>Withdraw</span></div>
+                <div class="menu-item" data-page="history"><span class="menu-icon">📜</span><span>History</span></div>
+                <div class="menu-item" data-page="logout" style="margin-top:20px; border-top:1px solid var(--border);"><span class="menu-icon">🚪</span><span>Logout</span></div>
+            `;
+            
+            document.querySelectorAll('#sideMenu .menu-item').forEach(item => {
+                const page = item.dataset.page;
+                if (page && page !== 'logout') item.onclick = () => { userNavigate(page); toggleMenu(); };
+                else if (page === 'logout') item.onclick = () => logout();
+            });
+            userNavigate('dashboard');
+        }
+
+        function userNavigate(page) {
+            currentUserPage = page;
+            const container = document.getElementById('mainContent');
+            const wallet = getUserWalletBalance(currentUser.id);
+            const todayEarnings = getUserEarnings(currentUser.id, getUTCDateString()).earnings;
+            const totalEarnings = getUserEarnings(currentUser.id).earnings;
+            const withdrawn = withdrawals.filter(w => w.user_id === currentUser.id && w.status === 'paid')
+                .reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            const pending = withdrawals.filter(w => w.user_id === currentUser.id && w.status === 'pending')
+                .reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            
+            if (page === 'dashboard') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>📊 My Dashboard</span>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                                <span class="live-badge">LIVE</span>
+                                <span class="reset-timer">🔄 Resets in: <span class="time">00:00:00</span></span>
+                            </div>
+                        </div>
+                            <div class="stats-grid">
+                                <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${todayEarnings.toFixed(2)}</div><div class="stat-label">Today's Earnings</div></div>
+                                <div class="stat-card"><div class="stat-number">${messages.filter(m => m.user_id === currentUser.id).length}</div><div class="stat-label">Total OTPs</div></div>
+                                <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${totalEarnings.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
+                            </div>
+                            <div class="wallet-card">
+                                <div class="amount">$${wallet.toFixed(2)}</div>
+                                <div class="label">💰 Available Balance</div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:10px;">
+                                <span class="status-indicator ${statusIndicator}">🔌 OTP: ${statusIndicator.toUpperCase()}</span>
+                                <div class="daily-otp-count">📊 Daily: <span class="count">${dailyOtps}</span> OTPs · $${dailyEarnings.toFixed(2)}</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (page === 'earnings') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>📊 My Earnings History</span></div>
+                            <div class="filter-bar">
+                                <div class="filter-group"><label>From Date</label><input type="date" id="userEarningsFrom"></div>
+                                <div class="filter-group"><label>To Date</label><input type="date" id="userEarningsTo"></div>
+                                <button class="btn-sm" onclick="applyUserEarningsFilter()">Apply</button>
+                                <button class="btn-sm btn-secondary" onclick="resetUserEarningsFilter()">Reset</button>
+                            </div>
+                            <div id="userEarningsSummary" style="margin-bottom:20px;"></div>
+                            <div class="data-table">
+                                <table>
+                                    <thead><tr><th>Number</th><th>Message</th><th>Amount</th><th>Date</th></tr></thead>
+                                    <tbody id="userEarningsTable"></tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top:20px;padding:16px;background:var(--hover-bg);border-radius:16px;text-align:center;">
+                                <strong>Total: <span id="userEarningsTotal" style="color:#f59e0b;">$0.00</span></strong>
+                                <span style="margin-left:20px;font-size:0.85rem;color:var(--text-light);">(${messages.filter(m => m.user_id === currentUser.id).length} OTPs)</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                refreshUserEarnings();
+            }
+            else if (page === 'allocate') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>📞 Allocate Number</span></div>
+                            <div style="padding:16px;background:var(--hover-bg);border-radius:16px;margin-bottom:20px;">
+                                <p style="font-size:0.85rem;color:var(--text-light);">Earn <strong style="color:#f59e0b;">$${OTP_PRICE}</strong> per OTP</p>
+                            </div>
+                            <div class="input-group"><label>Range ID</label><input type="text" id="userRangeId" value="26134"></div>
+                            <button onclick="userAllocateNumber()" class="btn-success">🚀 Allocate Number</button>
+                            <div id="userAllocateResult" style="margin-top:16px;display:none;padding:16px;border-radius:16px;"></div>
+                        </div>
+                        <div class="card"><div class="card-header"><span>📋 My Numbers</span></div>
+                            <div id="userNumbersList"></div>
+                        </div>
+                    </div>
+                `;
+                refreshUserAllocatePage();
+            }
+            else if (page === 'numbers') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>📞 My Numbers</span></div>
+                            <div id="userNumbersFullList"></div>
+                        </div>
+                    </div>
+                `;
+                refreshUserNumbersFull();
+            }
+            else if (page === 'withdraw') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>💰 Withdraw Funds</span></div>
+                            <div class="wallet-card" style="margin-bottom:20px;">
+                                <div class="amount">$${wallet.toFixed(2)}</div>
+                                <div class="label">Available Balance</div>
+                                <div class="sub" style="font-size:0.8rem;color:var(--text-light);">Min withdrawal: $${MIN_WITHDRAWAL}</div>
+                            </div>
+                            <div class="input-group"><label>Amount ($)</label><input type="number" id="withdrawAmount" step="0.01" min="${MIN_WITHDRAWAL}" placeholder="0.00"></div>
+                            <div class="input-group"><label>Account Name</label><input type="text" id="withdrawAccountName" placeholder="Enter account holder name"></div>
+                            <div class="input-group"><label>Account Number</label><input type="text" id="withdrawAccountNumber" placeholder="Enter account number"></div>
+                            <div class="input-group"><label>Bank Name</label><input type="text" id="withdrawBankName" placeholder="Enter bank name"></div>
+                            <button onclick="requestUserWithdrawal()" class="btn-success">💰 Request Withdrawal</button>
+                            <div id="withdrawResult" style="margin-top:16px;display:none;padding:16px;border-radius:16px;"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (page === 'history') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>📜 Withdrawal History</span></div>
+                            <div id="userWithdrawalHistory"></div>
+                        </div>
+                    </div>
+                `;
+                refreshUserWithdrawalHistory();
+            }
+            
+            setTimeout(() => updateDailyDisplay(), 100);
+            document.querySelectorAll('#sideMenu .menu-item').forEach(item => item.classList.remove('active'));
+            const activeItem = document.querySelector(`#sideMenu .menu-item[data-page="${page}"]`);
+            if (activeItem) activeItem.classList.add('active');
+        }
+
+        function refreshCurrentUserView() {
+            if (currentUserPage === 'dashboard') {}
+            else if (currentUserPage === 'earnings') refreshUserEarnings();
+            else if (currentUserPage === 'allocate') refreshUserAllocatePage();
+            else if (currentUserPage === 'numbers') refreshUserNumbersFull();
+            else if (currentUserPage === 'history') refreshUserWithdrawalHistory();
+            updateDailyDisplay();
+        }
+
+        // ============ USER EARNINGS ============
+        function refreshUserEarnings() {
+            const fromDate = document.getElementById('userEarningsFrom')?.value || '';
+            const toDate = document.getElementById('userEarningsTo')?.value || '';
+            
+            let userMessages = messages.filter(m => m.user_id === currentUser.id);
+            if (fromDate) {
+                const from = new Date(fromDate);
+                from.setUTCHours(0,0,0,0);
+                userMessages = userMessages.filter(m => new Date(m.created_at) >= from);
+            }
+            if (toDate) {
+                const to = new Date(toDate);
+                to.setUTCHours(23,59,59,999);
+                userMessages = userMessages.filter(m => new Date(m.created_at) <= to);
+            }
+            
+            const total = userMessages.length * OTP_PRICE;
+            
+            const summaryDiv = document.getElementById('userEarningsSummary');
+            if (summaryDiv) {
+                summaryDiv.innerHTML = `
+                    <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="stat-card"><div class="stat-number">${userMessages.length}</div><div class="stat-label">OTPs</div></div>
+                        <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${total.toFixed(2)}</div><div class="stat-label">Earnings</div></div>
+                    </div>
+                `;
+            }
+            
+            const tbody = document.getElementById('userEarningsTable');
+            if (tbody) {
+                if (userMessages.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;">No earnings in this period</td></tr>';
+                } else {
+                    tbody.innerHTML = userMessages.slice(0, 100).map(m => {
+                        return `<tr>
+                            <td>📞 ${escapeHtml(m.from_number)}</td>
+                            <td>${escapeHtml(m.content || '').substring(0, 50)}</td>
+                            <td style="color:#f59e0b;font-weight:600;">+$${OTP_PRICE.toFixed(3)}</td>
+                            <td>${new Date(m.created_at).toLocaleDateString()}</td>
+                        </tr>`;
+                    }).join('');
+                }
+            }
+            
+            document.getElementById('userEarningsTotal').textContent = `$${total.toFixed(2)}`;
+        }
+
+        function applyUserEarningsFilter() {
+            refreshUserEarnings();
+            showToast('Filter applied');
+        }
+
+        function resetUserEarningsFilter() {
+            document.getElementById('userEarningsFrom').value = '';
+            document.getElementById('userEarningsTo').value = '';
+            refreshUserEarnings();
+            showToast('Filter reset');
+        }
+
+        // ============ USER ALLOCATE ============
+        async function refreshUserAllocatePage() {
+            await refreshAll();
+            const userNumbers = numbers.filter(n => n.user_id === currentUser.id);
+            const container = document.getElementById('userNumbersList');
+            if (container) {
+                container.innerHTML = userNumbers.map(n => {
+                    const count = getOtpCount(n.number);
+                    const isActive = count > 0;
+                    return `<div class="number-card ${isActive ? 'active' : ''}">
+                        <div><span class="number">📞 ${escapeHtml(n.number)}</span></div>
+                        <div class="details">
+                            <span class="otp-count">${count} OTPs</span>
+                            ${isActive ? '<span class="badge-otp">✓ Active</span>' : ''}
+                        </div>
+                        <div class="details">Earnings: <span class="earnings">$${(count * OTP_PRICE).toFixed(2)}</span></div>
+                    </div>`;
+                }).join('') || '<div style="text-align:center;padding:20px;color:var(--text-light);">No numbers allocated</div>';
+            }
+        }
+
+        async function refreshUserNumbersFull() {
+            await refreshAll();
+            const userNumbers = numbers.filter(n => n.user_id === currentUser.id);
+            const container = document.getElementById('userNumbersFullList');
+            if (container) {
+                container.innerHTML = userNumbers.map(n => {
+                    const count = getOtpCount(n.number);
+                    const isActive = count > 0;
+                    return `<div class="number-card ${isActive ? 'active' : ''}">
+                        <div><span class="number">📞 ${escapeHtml(n.number)}</span></div>
+                        <div class="details">
+                            <span class="otp-count">${count} OTPs</span>
+                            ${isActive ? '<span class="badge-otp">✓ Active</span>' : ''}
+                        </div>
+                        <div class="details">Earnings: <span class="earnings">$${(count * OTP_PRICE).toFixed(2)}</span></div>
+                        <div style="font-size:0.7rem;color:var(--text-light);">${n.created_at ? new Date(n.created_at).toLocaleDateString() : '-'}</div>
+                    </div>`;
+                }).join('') || '<div style="text-align:center;padding:20px;color:var(--text-light);">No numbers</div>';
+            }
+        }
+
+        async function refreshUserWithdrawalHistory() {
+            await refreshAll();
+            const userWithdrawals = withdrawals.filter(w => w.user_id === currentUser.id);
+            const container = document.getElementById('userWithdrawalHistory');
+            if (container) {
+                container.innerHTML = userWithdrawals.map(w => {
+                    return `<div class="item-card">
+                        <div><strong>$${parseFloat(w.amount).toFixed(2)}</strong></div>
+                        <div>${escapeHtml(w.bank_name)} - ${escapeHtml(w.account_number)}</div>
+                        <div>${escapeHtml(w.account_name)}</div>
+                        <div><span class="badge ${w.status === 'paid' ? 'badge-paid' : 'badge-pending'}">${w.status}</span></div>
+                        <div style="font-size:0.7rem;color:var(--text-light);">${new Date(w.created_at).toLocaleDateString()}</div>
+                    </div>`;
+                }).join('') || '<div style="text-align:center;padding:40px;color:var(--text-light);">No withdrawals yet</div>';
+            }
+        }
+
+        // ============ USER ACTIONS ============
+        async function userAllocateNumber() {
+            const rangeId = document.getElementById('userRangeId').value.trim();
+            const resultDiv = document.getElementById('userAllocateResult');
+            
+            if (!rangeId) { showToast('Enter Range ID', true); return; }
+            
+            try {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '⏳ Allocating...';
+                resultDiv.style.background = 'rgba(251,191,36,0.1)';
+                
+                const result = await allocateNumber(rangeId);
+                if (result && result.full_number) {
+                    await saveNumberToDatabase(result.full_number, currentUser.id, `R_${rangeId}`);
+                    resultDiv.innerHTML = `✅ ${result.full_number} allocated!`;
+                    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+                    await refreshAll();
+                    refreshUserAllocatePage();
+                    showToast(`✅ ${result.full_number} allocated!`);
+                }
+            } catch (e) {
+                resultDiv.innerHTML = `❌ ${e.message}`;
+                resultDiv.style.background = 'rgba(239,68,68,0.1)';
+                showToast('Allocation failed', true);
+            }
+        }
+
+        async function requestUserWithdrawal() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const accountName = document.getElementById('withdrawAccountName').value.trim();
+            const accountNumber = document.getElementById('withdrawAccountNumber').value.trim();
+            const bankName = document.getElementById('withdrawBankName').value.trim();
+            const resultDiv = document.getElementById('withdrawResult');
+            
+            if (!amount || amount < MIN_WITHDRAWAL) {
+                showToast(`Minimum withdrawal is $${MIN_WITHDRAWAL}`, true);
+                return;
+            }
+            if (!accountName || !accountNumber || !bankName) {
+                showToast('Please fill all bank details', true);
+                return;
+            }
+            
+            try {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = '⏳ Processing...';
+                resultDiv.style.background = 'rgba(251,191,36,0.1)';
+                
+                await requestWithdrawal(currentUser.id, amount, accountName, accountNumber, bankName);
+                resultDiv.innerHTML = `✅ Withdrawal request of $${amount.toFixed(2)} submitted!`;
+                resultDiv.style.background = 'rgba(16,185,129,0.1)';
+                
+                document.getElementById('withdrawAmount').value = '';
+                document.getElementById('withdrawAccountName').value = '';
+                document.getElementById('withdrawAccountNumber').value = '';
+                document.getElementById('withdrawBankName').value = '';
+                
+                await refreshAll();
+                showToast(`✅ Withdrawal request submitted!`);
+            } catch (e) {
+                resultDiv.innerHTML = `❌ ${e.message}`;
+                resultDiv.style.background = 'rgba(239,68,68,0.1)';
+                showToast(e.message, true);
+            }
+        }
+
+        // ============ LOGOUT ============
+        function logout() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            if (otpPollingInterval) clearInterval(otpPollingInterval);
+            if (timerInterval) clearInterval(timerInterval);
+            currentUser = null;
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('menuBtn').style.display = 'none';
+            document.getElementById('settingsBtn').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // ============ SETTINGS ============
+        document.getElementById('settingsBtn').onclick = () => {
+            document.getElementById('currentUserDisplay').value = currentUser?.username || '';
+            document.getElementById('settingsModal').classList.add('show');
+        };
+        document.getElementById('closeModalBtn').onclick = () => {
+            document.getElementById('settingsModal').classList.remove('show');
+            document.getElementById('oldPassword').value = '';
+            document.getElementById('newPasswordField').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        };
+        document.getElementById('changePasswordBtn').onclick = async () => {
+            const oldPass = document.getElementById('oldPassword').value;
+            const newPass = document.getElementById('newPasswordField').value;
+            const confirmPass = document.getElementById('confirmNewPassword').value;
+            if(await changePassword(oldPass, newPass, confirmPass)) {
+                document.getElementById('settingsModal').classList.remove('show');
+                document.getElementById('oldPassword').value = '';
+                document.getElementById('newPasswordField').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+            }
+        };
+
+        // ============ THEME ============
+        const savedTheme = localStorage.getItem('sms_theme') || 'light';
+        setTheme(savedTheme);
+        document.getElementById('lightThemeBtn').onclick = () => setTheme('light');
+        document.getElementById('darkThemeBtn').onclick = () => setTheme('dark');
+
+        // ============ EXPOSE FUNCTIONS ============
+        window.adminNavigate = adminNavigate;
+        window.userNavigate = userNavigate;
+        window.showCreateUser = showCreateUser;
+        window.hideCreateUser = hideCreateUser;
+        window.createUser = createUser;
+        window.deleteUser = deleteUser;
+        window.deleteNumber = deleteNumber;
+        window.adminAllocateNumber = adminAllocateNumber;
+        window.userAllocateNumber = userAllocateNumber;
+        window.markWithdrawalPaid = markWithdrawalPaid;
+        window.rejectWithdrawal = rejectWithdrawal;
+        window.applyAdminWithdrawFilter = applyAdminWithdrawFilter;
+        window.resetAdminWithdrawFilter = resetAdminWithdrawFilter;
+        window.applyAdminEarningsFilter = applyAdminEarningsFilter;
+        window.resetAdminEarningsFilter = resetAdminEarningsFilter;
+        window.applyUserEarningsFilter = applyUserEarningsFilter;
+        window.resetUserEarningsFilter = resetUserEarningsFilter;
+        window.requestUserWithdrawal = requestUserWithdrawal;
+        window.doLogin = doLogin;
+        window.toggleMenu = toggleMenu;
+    </script>
+</body>
+</html>
