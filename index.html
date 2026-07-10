@@ -8,72 +8,82 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Inter', sans-serif;
-            background: #e8e4dc;
-            color: #2c2418;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0f;
+            color: #e8e4dc;
             transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
         }
         
         body.light {
-            --primary: #5b8c5a;
-            --primary-dark: #3d6b3c;
-            --secondary: #c4a35a;
-            --accent: #d17a5e;
-            --text: #2c2418;
-            --text-light: #6b5b4a;
+            --primary: #2d6a4f;
+            --primary-dark: #1b4332;
+            --primary-light: #40916c;
+            --secondary: #d4a373;
+            --accent: #e76f51;
+            --text: #1a1a2e;
+            --text-light: #4a4a6a;
             --border: #e0d6c8;
-            --card-bg: #fefcf8;
-            --bg-page: #e8e4dc;
-            --shadow: rgba(0, 0, 0, 0.05);
+            --card-bg: #ffffff;
+            --bg-page: #f5f0eb;
+            --shadow: rgba(0, 0, 0, 0.06);
             --hover-bg: #f0ebe2;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --purple: #8b5cf6;
+            --success: #0d9488;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --purple: #7c3aed;
+            --glass: rgba(255, 255, 255, 0.7);
         }
         
         body.dark {
-            --primary: #6c9e6b;
-            --primary-dark: #4a7c49;
-            --secondary: #c4a35a;
-            --accent: #e08f6e;
+            --primary: #40916c;
+            --primary-dark: #2d6a4f;
+            --primary-light: #52b788;
+            --secondary: #d4a373;
+            --accent: #e76f51;
             --text: #e8e4dc;
-            --text-light: #a8a09a;
+            --text-light: #9a9ab5;
             --border: #2a2a4a;
-            --card-bg: #1a1a2e;
-            --bg-page: #0f0f1a;
-            --shadow: rgba(0, 0, 0, 0.2);
-            --hover-bg: #1f2a4a;
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
-            --purple: #8b5cf6;
-            background: var(--bg-page);
-            color: var(--text);
+            --card-bg: #14141f;
+            --bg-page: #0a0a0f;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --hover-bg: #1f1f35;
+            --success: #0d9488;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --purple: #7c3aed;
+            --glass: rgba(20, 20, 31, 0.8);
         }
         
         body.light { background: var(--bg-page); }
         body.dark { background: var(--bg-page); }
 
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
+
         .settings-btn {
             position: fixed;
             top: 20px;
             right: 20px;
-            width: 48px;
-            height: 48px;
-            background: var(--card-bg);
-            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             z-index: 1000;
             border: 1px solid var(--border);
-            font-size: 1.5rem;
-            transition: all 0.3s;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            color: var(--text);
         }
-        .settings-btn:hover { transform: scale(1.05); }
+        .settings-btn:hover { transform: scale(1.05); background: var(--hover-bg); }
 
         .modal {
             position: fixed;
@@ -81,28 +91,31 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
             z-index: 2000;
             display: none;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         .modal.show { display: flex; }
         .modal-content {
             background: var(--card-bg);
-            border-radius: 28px;
-            max-width: 500px;
-            width: 90%;
-            padding: 28px;
+            border-radius: 24px;
+            max-width: 480px;
+            width: 100%;
+            padding: 32px;
             border: 1px solid var(--border);
             max-height: 90vh;
             overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
         .modal-header {
-            font-size: 1.5rem;
+            font-size: 1.3rem;
             font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--primary-dark);
+            margin-bottom: 24px;
+            color: var(--primary);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -110,63 +123,70 @@
         }
         .modal-close {
             cursor: pointer;
-            font-size: 1.8rem;
+            font-size: 1.5rem;
             line-height: 1;
             color: var(--text-light);
+            transition: transform 0.2s;
         }
+        .modal-close:hover { transform: rotate(90deg); }
         
-        .theme-options { display: flex; gap: 20px; margin-top: 10px; flex-wrap: wrap; }
+        .theme-options { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
         .theme-card {
             flex: 1;
-            min-width: 120px;
+            min-width: 100px;
             padding: 16px;
-            border-radius: 20px;
+            border-radius: 16px;
             cursor: pointer;
             text-align: center;
-            transition: all 0.2s;
+            transition: all 0.3s;
             border: 2px solid var(--border);
+            background: var(--card-bg);
         }
-        .theme-card:hover { transform: translateY(-2px); }
+        .theme-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
         .theme-card.selected { border-color: var(--primary); background: var(--hover-bg); }
         .theme-preview {
-            width: 60px;
-            height: 60px;
-            border-radius: 30px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
             margin: 0 auto 10px;
+            border: 2px solid var(--border);
         }
-        .light-preview { background: linear-gradient(135deg, #e8e4dc, #fefcf8); border: 1px solid #ddd; }
-        .dark-preview { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 1px solid #333; }
+        .light-preview { background: linear-gradient(135deg, #f5f0eb, #ffffff); }
+        .dark-preview { background: linear-gradient(135deg, #0a0a0f, #14141f); }
 
         .menu-btn {
             position: fixed;
             top: 20px;
             left: 20px;
-            width: 48px;
-            height: 48px;
-            background: var(--card-bg);
-            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             gap: 5px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
             z-index: 1000;
             border: 1px solid var(--border);
+            transition: all 0.3s ease;
         }
-        .menu-btn span { width: 24px; height: 2px; background: var(--text); border-radius: 2px; }
+        .menu-btn:hover { background: var(--hover-bg); }
+        .menu-btn span { width: 22px; height: 2px; background: var(--text); border-radius: 4px; transition: 0.3s; }
 
         .side-menu {
             position: fixed;
             top: 0;
-            left: -280px;
-            width: 280px;
+            left: -300px;
+            width: 300px;
             height: 100vh;
             background: var(--card-bg);
-            box-shadow: 2px 0 20px rgba(0,0,0,0.1);
+            box-shadow: 4px 0 30px rgba(0,0,0,0.2);
             z-index: 999;
-            transition: left 0.3s ease;
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
             padding: 80px 20px 20px;
             overflow-y: auto;
             border-right: 1px solid var(--border);
@@ -185,92 +205,119 @@
         .menu-overlay.show { display: block; }
 
         .menu-item {
-            padding: 14px 16px;
-            margin-bottom: 8px;
-            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 6px;
+            border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s;
-            font-size: 1rem;
+            font-size: 0.95rem;
             font-weight: 500;
             color: var(--text);
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
         }
         .menu-item:hover { background: var(--hover-bg); transform: translateX(4px); }
-        .menu-item.active { background: var(--primary); color: white; }
-        .menu-icon { font-size: 1.3rem; width: 28px; }
+        .menu-item.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(45, 106, 79, 0.3); }
+        .menu-icon { font-size: 1.2rem; width: 26px; text-align: center; }
 
         .main-content {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 80px 20px 30px;
+            padding: 80px 24px 30px;
         }
 
-        .page { display: none; animation: fadeIn 0.3s; }
+        .page { display: none; animation: fadeSlide 0.35s ease; }
         .page.active-page { display: block; }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
         .card {
             background: var(--card-bg);
-            border-radius: 24px;
-            padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 8px var(--shadow);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px var(--shadow);
             border: 1px solid var(--border);
+            transition: all 0.3s ease;
         }
+        .card:hover { box-shadow: 0 4px 24px var(--shadow); }
         .card-header {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 600;
             margin-bottom: 20px;
-            color: var(--primary-dark);
+            color: var(--primary);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 15px;
-            padding-bottom: 12px;
+            padding-bottom: 14px;
             border-bottom: 2px solid var(--border);
+            letter-spacing: -0.3px;
         }
 
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
         }
         .stat-card {
-            background: linear-gradient(135deg, var(--card-bg) 0%, var(--hover-bg) 100%);
-            border-radius: 20px;
-            padding: 20px;
+            background: var(--hover-bg);
+            border-radius: 16px;
+            padding: 18px 16px;
             text-align: center;
             border: 1px solid var(--border);
-            cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            cursor: default;
         }
-        .stat-card:hover { transform: translateY(-2px); }
-        .stat-number { font-size: 2rem; font-weight: 700; color: var(--primary); }
-        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-light); margin-top: 6px; }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px var(--shadow); }
+        .stat-number { 
+            font-size: 1.8rem; 
+            font-weight: 700; 
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+        .stat-label { 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px; 
+            color: var(--text-light); 
+            margin-top: 6px;
+            font-weight: 500;
+        }
+        .stat-card.accent .stat-number { color: var(--accent); }
+        .stat-card.warning .stat-number { color: var(--warning); }
+        .stat-card.success .stat-number { color: var(--success); }
+        .stat-card.purple .stat-number { color: var(--purple); }
 
         .wallet-card {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05));
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
             border-radius: 20px;
-            padding: 24px;
-            border: 2px solid var(--success);
+            padding: 28px;
             text-align: center;
+            color: white;
+            box-shadow: 0 8px 30px rgba(45, 106, 79, 0.25);
         }
         .wallet-card .amount {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             font-weight: 700;
-            color: var(--success);
+            letter-spacing: -1px;
         }
         .wallet-card .label {
             font-size: 0.8rem;
-            color: var(--text-light);
+            opacity: 0.8;
             margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+        .wallet-card .sub {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-top: 8px;
         }
 
         .login-overlay {
@@ -279,7 +326,7 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, #5b8c5a 0%, #3d6b3c 100%);
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -287,69 +334,114 @@
         }
         .login-box {
             background: var(--card-bg);
-            border-radius: 30px;
-            padding: 40px;
+            border-radius: 28px;
+            padding: 44px 36px;
             width: 100%;
             max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
             border: 1px solid var(--border);
         }
-        .login-box h2 { text-align: center; margin-bottom: 30px; color: var(--primary-dark); }
-        .login-error { background: #fee; color: #c33; padding: 12px; border-radius: 10px; margin-bottom: 20px; display: none; text-align: center; font-size: 0.85rem; }
+        .login-box h2 { 
+            text-align: center; 
+            margin-bottom: 32px; 
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+        .login-error { 
+            background: rgba(220, 38, 38, 0.1); 
+            color: var(--danger); 
+            padding: 12px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            display: none; 
+            text-align: center; 
+            font-size: 0.85rem;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
 
         .input-group { margin-bottom: 18px; }
-        label { display: block; font-weight: 500; margin-bottom: 8px; color: var(--text); font-size: 0.85rem; }
+        label { 
+            display: block; 
+            font-weight: 500; 
+            margin-bottom: 6px; 
+            color: var(--text); 
+            font-size: 0.8rem;
+            letter-spacing: 0.3px;
+        }
         input, select, textarea {
             width: 100%;
             padding: 12px 16px;
-            border: 1px solid var(--border);
-            border-radius: 16px;
+            border: 2px solid var(--border);
+            border-radius: 14px;
             font-size: 0.95rem;
             background: var(--card-bg);
             color: var(--text);
             font-family: inherit;
+            transition: all 0.3s ease;
         }
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(91,140,90,0.1);
+            box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.1);
         }
 
         button {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 40px;
+            padding: 12px 28px;
+            border-radius: 14px;
             font-weight: 600;
             font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s ease;
+            letter-spacing: 0.2px;
         }
-        button:hover { background: var(--primary-dark); transform: translateY(-1px); }
-        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        button:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(45, 106, 79, 0.25); }
+        button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
         .btn-secondary { background: var(--secondary); }
+        .btn-secondary:hover { background: #c49a6b; }
         .btn-danger { background: var(--danger); }
-        .btn-sm { padding: 8px 16px; font-size: 0.8rem; }
+        .btn-danger:hover { background: #b91c1c; box-shadow: 0 6px 20px rgba(220, 38, 38, 0.25); }
+        .btn-sm { padding: 8px 16px; font-size: 0.78rem; border-radius: 10px; }
         .btn-success { background: var(--success); }
-        .btn-success:hover { background: #059669; }
+        .btn-success:hover { background: #0f766e; box-shadow: 0 6px 20px rgba(13, 148, 136, 0.25); }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover { background: var(--hover-bg); box-shadow: none; transform: translateY(-2px); }
 
-        .data-table { overflow-x: auto; border-radius: 16px; }
+        .data-table { overflow-x: auto; border-radius: 14px; }
         table { width: 100%; border-collapse: collapse; }
         th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--border); }
-        th { font-weight: 600; color: var(--text-light); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; }
+        th { 
+            font-weight: 600; 
+            color: var(--text-light); 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid var(--border);
+        }
+        tr:hover td { background: var(--hover-bg); }
 
         .badge {
             padding: 4px 12px;
-            border-radius: 30px;
+            border-radius: 20px;
             font-size: 0.7rem;
             display: inline-block;
             font-weight: 600;
+            letter-spacing: 0.3px;
         }
         .badge-pending { background: var(--warning); color: white; }
         .badge-paid { background: var(--success); color: white; }
-        .badge-admin { background: #8b5cf6; color: white; }
-        .badge-user { background: var(--success); color: white; }
+        .badge-admin { background: var(--purple); color: white; }
+        .badge-user { background: var(--primary); color: white; }
+        .badge-rejected { background: var(--danger); color: white; }
 
         .filter-bar {
             display: flex;
@@ -359,36 +451,40 @@
             margin-bottom: 20px;
         }
         .filter-group { flex: 1; min-width: 130px; }
-        .filter-group label { font-size: 0.7rem; margin-bottom: 4px; }
+        .filter-group label { font-size: 0.7rem; margin-bottom: 4px; color: var(--text-light); }
 
         .toast {
             position: fixed;
             bottom: 30px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) translateY(100px);
             background: var(--text);
             color: var(--card-bg);
-            padding: 12px 24px;
-            border-radius: 50px;
+            padding: 14px 28px;
+            border-radius: 14px;
             font-size: 0.85rem;
             z-index: 1001;
             opacity: 0;
-            transition: opacity 0.3s;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             pointer-events: none;
             white-space: nowrap;
             max-width: 90%;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
         }
-        .toast.show { opacity: 1; }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
         .live-badge {
             background: var(--success);
             color: white;
-            padding: 4px 12px;
+            padding: 4px 14px;
             border-radius: 20px;
             font-size: 0.7rem;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
         }
         .live-badge::before {
             content: '';
@@ -406,20 +502,21 @@
 
         .status-indicator {
             display: inline-block;
-            padding: 4px 12px;
+            padding: 4px 14px;
             border-radius: 20px;
             font-size: 0.7rem;
             font-weight: 600;
+            letter-spacing: 0.3px;
         }
-        .status-indicator.online { background: rgba(16, 185, 129, 0.2); color: var(--success); }
-        .status-indicator.offline { background: rgba(239, 68, 68, 0.2); color: var(--danger); }
-        .status-indicator.testing { background: rgba(251, 191, 36, 0.2); color: var(--warning); }
+        .status-indicator.online { background: rgba(13, 148, 136, 0.15); color: var(--success); }
+        .status-indicator.offline { background: rgba(220, 38, 38, 0.15); color: var(--danger); }
+        .status-indicator.testing { background: rgba(217, 119, 6, 0.15); color: var(--warning); }
 
         .number-card {
             background: var(--hover-bg);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -428,10 +525,13 @@
             border: 1px solid var(--border);
             transition: all 0.3s ease;
         }
+        .number-card:hover { border-color: var(--primary); }
         .number-card .number {
-            font-size: 1.1rem;
+            font-size: 1rem;
             font-weight: 600;
             color: var(--text);
+            font-family: 'Inter', monospace;
+            letter-spacing: 0.5px;
         }
         .number-card .details {
             font-size: 0.8rem;
@@ -445,51 +545,50 @@
             font-weight: 600;
         }
         .number-card .country-code {
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             color: var(--text-light);
             background: var(--border);
-            padding: 2px 8px;
-            border-radius: 10px;
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-weight: 500;
         }
 
         .number-card.active {
             background: var(--purple);
             border-color: var(--purple);
-            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.15);
         }
-        .number-card.active .number {
-            color: #4ade80;
-        }
-        .number-card.active .details {
-            color: rgba(255, 255, 255, 0.8);
-        }
-        .number-card.active .earnings {
-            color: #4ade80;
-        }
-        .number-card.active .otp-count {
-            color: #4ade80;
-        }
-        .number-card.active .badge-otp {
-            background: rgba(74, 222, 128, 0.2);
-            color: #4ade80;
-            padding: 2px 10px;
-            border-radius: 12px;
-            font-size: 0.65rem;
-        }
-        .number-card.active .country-code {
-            background: rgba(255,255,255,0.2);
-            color: rgba(255,255,255,0.8);
-        }
+        .number-card.active .number { color: white; }
+        .number-card.active .details { color: rgba(255,255,255,0.7); }
+        .number-card.active .earnings { color: #a78bfa; }
+        .number-card.active .otp-count { color: white; }
+        .number-card.active .country-code { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
+        .number-card.active .badge-otp { background: rgba(255,255,255,0.15); color: white; }
 
         .badge-otp {
-            background: var(--purple);
+            background: var(--primary);
             color: white;
-            padding: 2px 10px;
+            padding: 2px 12px;
             border-radius: 12px;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
+            font-weight: 600;
         }
 
-        /* ===== LIVE CONSOLE STYLES ===== */
+        .item-card {
+            background: var(--hover-bg);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+        .item-card:hover { border-color: var(--primary); }
+
         .console-status {
             display: flex;
             justify-content: space-between;
@@ -520,6 +619,7 @@
             color: var(--text-light);
             font-size: 12px;
         }
+
         .console-hits {
             display: flex;
             flex-direction: column;
@@ -528,17 +628,10 @@
             overflow-y: auto;
             padding-right: 4px;
         }
-        .console-hits::-webkit-scrollbar {
-            width: 4px;
-        }
-        .console-hits::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-            border-radius: 4px;
-        }
-        .console-hits::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 4px;
-        }
+        .console-hits::-webkit-scrollbar { width: 4px; }
+        .console-hits::-webkit-scrollbar-track { background: transparent; }
+        .console-hits::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
         .console-hit {
             background: var(--card-bg);
             border-radius: 12px;
@@ -556,40 +649,30 @@
             position: relative;
             border: 1px solid var(--border);
         }
-        .console-hit:hover {
-            transform: scale(1.01);
-            border-color: var(--success);
-        }
-        .console-hit:active {
-            transform: scale(0.98);
-        }
+        .console-hit:hover { transform: scale(1.01); border-color: var(--success); }
+        .console-hit:active { transform: scale(0.98); }
         .console-hit .range {
             font-weight: 700;
             color: var(--success);
-            font-family: monospace;
-            font-size: 16px;
+            font-family: 'Inter', monospace;
+            font-size: 15px;
             letter-spacing: 0.5px;
             user-select: all;
-            cursor: copy;
         }
-        .console-hit .range::before {
-            content: '📋 ';
-            font-size: 12px;
-            opacity: 0.5;
-        }
+        .console-hit .range::before { content: '📋 '; font-size: 11px; opacity: 0.5; }
         .console-hit .sid {
-            background: rgba(139, 92, 246, 0.2);
-            color: #8b5cf6;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 11px;
+            background: rgba(124, 58, 237, 0.15);
+            color: var(--purple);
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 10px;
             font-weight: 600;
         }
         .console-hit .message {
             color: var(--text);
-            font-size: 14px;
+            font-size: 13px;
             flex: 1;
-            min-width: 120px;
+            min-width: 100px;
         }
         .console-hit .time {
             color: var(--text-light);
@@ -600,38 +683,35 @@
             font-size: 0.6rem;
             color: var(--text-light);
             background: var(--border);
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-weight: 600;
-            letter-spacing: 0.3px;
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-weight: 500;
         }
         .console-hit .badge-new {
-            background: rgba(16, 185, 129, 0.15);
+            background: rgba(13, 148, 136, 0.15);
             color: var(--success);
-            padding: 2px 8px;
+            padding: 2px 10px;
             border-radius: 10px;
-            font-size: 9px;
+            font-size: 8px;
             font-weight: 600;
             animation: fadeBadge 3s ease forwards;
         }
         .console-hit .copied-toast {
             position: absolute;
-            top: -10px;
-            right: -10px;
+            top: -8px;
+            right: -8px;
             background: var(--success);
             color: white;
             padding: 4px 12px;
-            border-radius: 20px;
+            border-radius: 12px;
             font-size: 10px;
             font-weight: 700;
             opacity: 0;
             transition: opacity 0.3s;
             pointer-events: none;
         }
-        .console-hit .copied-toast.show {
-            opacity: 1;
-            animation: popIn 0.3s ease;
-        }
+        .console-hit .copied-toast.show { opacity: 1; animation: popIn 0.3s ease; }
+
         @keyframes popIn {
             0% { transform: scale(0.5); opacity: 0; }
             70% { transform: scale(1.2); }
@@ -646,15 +726,14 @@
             70% { opacity: 1; }
             100% { opacity: 0; }
         }
+
         .console-empty {
             text-align: center;
             padding: 60px 20px;
             color: var(--text-light);
         }
-        .console-empty .icon {
-            font-size: 48px;
-            margin-bottom: 16px;
-        }
+        .console-empty .icon { font-size: 48px; margin-bottom: 16px; }
+
         .console-controls {
             display: flex;
             gap: 10px;
@@ -684,17 +763,13 @@
             font-weight: 600;
             border-color: var(--success);
         }
-        .console-controls button.primary:hover {
-            background: #059669;
-        }
+        .console-controls button.primary:hover { background: #0f766e; }
         .console-controls button.primary.running {
             background: var(--warning);
             color: var(--text);
             border-color: var(--warning);
         }
-        .console-controls button.primary.running:hover {
-            background: #d97706;
-        }
+        .console-controls button.primary.running:hover { background: #b45309; }
         .console-controls button.danger:hover {
             background: var(--danger);
             color: white;
@@ -708,10 +783,10 @@
         }
         .console-footer kbd {
             background: var(--hover-bg);
-            padding: 2px 8px;
-            border-radius: 4px;
+            padding: 2px 10px;
+            border-radius: 6px;
             font-size: 10px;
-            font-family: monospace;
+            font-family: 'Inter', monospace;
             border: 1px solid var(--border);
         }
         .console-scroll-indicator {
@@ -727,18 +802,10 @@
             display: none;
             border: 1px solid var(--border);
         }
-        .console-scroll-indicator:hover {
-            background: var(--primary);
-            color: white;
-        }
-        .console-scroll-indicator .arrow {
-            display: inline-block;
-            animation: bounce 1s infinite;
-        }
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-4px); }
-        }
+        .console-scroll-indicator:hover { background: var(--primary); color: white; }
+        .console-scroll-indicator .arrow { display: inline-block; animation: bounce 1s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
         .console-toast {
             position: fixed;
             bottom: 30px;
@@ -747,24 +814,21 @@
             background: var(--success);
             color: white;
             padding: 12px 24px;
-            border-radius: 30px;
+            border-radius: 14px;
             font-size: 14px;
             font-weight: 600;
             opacity: 0;
             transition: all 0.4s ease;
             z-index: 999;
             pointer-events: none;
-            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 8px 30px rgba(13, 148, 136, 0.3);
         }
-        .console-toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(-10px);
-        }
+        .console-toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
 
         .allocated-result {
             background: var(--card-bg);
             border-radius: 16px;
-            padding: 20px;
+            padding: 24px;
             border: 2px solid var(--success);
             margin-top: 16px;
             text-align: center;
@@ -772,15 +836,13 @@
             transition: all 0.3s ease;
             position: relative;
         }
-        .allocated-result:hover {
-            transform: scale(1.02);
-            box-shadow: 0 0 30px rgba(16, 185, 129, 0.2);
-        }
+        .allocated-result:hover { transform: scale(1.02); box-shadow: 0 0 40px rgba(13, 148, 136, 0.15); }
         .allocated-result .number {
             font-size: 2rem;
             font-weight: 700;
             color: var(--success);
             letter-spacing: 2px;
+            font-family: 'Inter', monospace;
         }
         .allocated-result .details {
             font-size: 0.85rem;
@@ -791,6 +853,7 @@
             font-size: 0.75rem;
             color: var(--text-light);
             margin-top: 6px;
+            opacity: 0.6;
         }
         .allocated-result .copied-badge {
             position: absolute;
@@ -798,16 +861,14 @@
             right: -10px;
             background: var(--success);
             color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
+            padding: 4px 14px;
+            border-radius: 12px;
             font-size: 0.7rem;
             font-weight: 600;
             opacity: 0;
             transition: opacity 0.3s;
         }
-        .allocated-result .copied-badge.show {
-            opacity: 1;
-        }
+        .allocated-result .copied-badge.show { opacity: 1; }
 
         .copy-options {
             display: flex;
@@ -835,6 +896,102 @@
             accent-color: var(--primary);
         }
 
+        .item-card {
+            background: var(--hover-bg);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+        .item-card:hover { border-color: var(--primary); }
+
+        /* User Activity specific styles */
+        .activity-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .activity-stat {
+            background: var(--hover-bg);
+            border-radius: 14px;
+            padding: 16px 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        .activity-stat .number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .activity-stat .label {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .user-activity-row {
+            background: var(--hover-bg);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .user-activity-row:hover { border-color: var(--primary); transform: translateX(4px); }
+        .user-activity-row .user-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .user-activity-row .user-details {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .user-activity-row .user-details span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .day-activity {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 6px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .day-activity .date {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .day-activity .stats {
+            display: flex;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        .day-activity .stats .otps { color: var(--primary); font-weight: 600; }
+        .day-activity .stats .earnings { color: var(--warning); font-weight: 600; }
+        .day-activity .stats .numbers { color: var(--purple); font-weight: 600; }
+
         @media (max-width: 768px) {
             .main-content { padding: 70px 16px 20px; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -843,10 +1000,11 @@
                 flex-direction: column;
                 align-items: flex-start;
             }
-            .console-hit .time {
-                align-self: flex-end;
-            }
+            .console-hit .time { align-self: flex-end; }
             .allocated-result .number { font-size: 1.5rem; }
+            .activity-summary { grid-template-columns: 1fr 1fr; }
+            .user-activity-row .user-details { flex-direction: column; gap: 4px; }
+            .day-activity { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -921,7 +1079,6 @@
     <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
     <div class="main-content" id="mainContent"></div>
     <div class="toast" id="toast"></div>
-
     <div class="console-toast" id="consoleToast">📋 Copied!</div>
 
     <script>
@@ -933,6 +1090,9 @@
         const OTP_URL = 'https://api.2oo9.cloud/MXS47FLFX0U/tnevs/@public/api';
         const OTP_PRICE = 0.005;
         const MIN_WITHDRAWAL = 0.50;
+        
+        const TELEGRAM_BOT_TOKEN = "7325597357:AAGt0t9u-5GHR6VOVdXFMdzNqAsT572lPBk";
+        const TELEGRAM_CHAT_ID = "-1004290930965";
         // =========================
 
         let currentUser = null;
@@ -947,14 +1107,12 @@
         let allocatedNumber = null;
         let copyWithCountry = false;
 
-        // ===== LIVE CONSOLE VARIABLES =====
         let consoleFeedInterval = null;
         let isConsoleRunning = false;
         let consoleHitCount = 0;
         let consoleKnownHits = new Set();
         let isConsoleScrolledToTop = true;
 
-        // ===== COUNTRY CODES =====
         const COUNTRY_CODES = {
             '224': { name: 'Guinea', flag: '🇬🇳' },
             '221': { name: 'Senegal', flag: '🇸🇳' },
@@ -1081,6 +1239,70 @@
                 if (match) return match[1];
             }
             return 'SMS';
+        }
+
+        function getDateRange(type) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch(type) {
+                case 'today':
+                    return { start: today, end: new Date(today.getTime() + 86400000) };
+                case 'yesterday':
+                    const yesterday = new Date(today.getTime() - 86400000);
+                    return { start: yesterday, end: today };
+                case 'week':
+                    const weekStart = new Date(today.getTime() - 7 * 86400000);
+                    return { start: weekStart, end: new Date(today.getTime() + 86400000) };
+                case 'month':
+                    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                    return { start: monthStart, end: new Date(now.getFullYear(), now.getMonth() + 1, 1) };
+                case 'all':
+                    return { start: new Date(0), end: new Date(8640000000000000) };
+                default:
+                    return { start: new Date(0), end: new Date(8640000000000000) };
+            }
+        }
+
+        function countOtpsByDateRange(messages, rangeType) {
+            const { start, end } = getDateRange(rangeType);
+            return messages.filter(m => {
+                const date = new Date(m.created_at);
+                return date >= start && date < end;
+            }).length;
+        }
+
+        // ===== TELEGRAM =====
+        async function sendToTelegram(otp) {
+            try {
+                const message = `<blockquote>⏰ <b>Time:</b> ${new Date(otp.time).toLocaleString()}</blockquote>
+<blockquote>📌 <b>Sender:</b> ${extractSid(otp.message)}</blockquote>
+<blockquote>☎️ <b>Number:</b> ${otp.number}</blockquote>
+
+<b>Panel - GENESYS SMS</b>`;
+                
+                const keyboard = {
+                    inline_keyboard: [[
+                        { text: "👨‍💻 Developer", url: "https://t.me/prince_ACTIVE1" }
+                    ]]
+                };
+                
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML',
+                        reply_markup: keyboard
+                    })
+                });
+                
+                return response.ok;
+            } catch (e) {
+                console.error('Telegram error:', e);
+                return false;
+            }
         }
 
         // ===== TIMER =====
@@ -1239,6 +1461,30 @@
             return result;
         }
 
+        // ===== DELETE DUPLICATE OTPS =====
+        async function deleteDuplicateOtps() {
+            const otpMap = new Map();
+            let deleted = 0;
+            
+            for (const msg of messages) {
+                if (!msg.otp_id) continue;
+                if (otpMap.has(msg.otp_id)) {
+                    // Delete this duplicate
+                    await apiFetch(`messages?id=eq.${msg.id}`, { method: 'DELETE' });
+                    deleted++;
+                    console.log(`Deleted duplicate OTP: ${msg.otp_id} (ID: ${msg.id})`);
+                } else {
+                    otpMap.set(msg.otp_id, msg.id);
+                }
+            }
+            
+            if (deleted > 0) {
+                await refreshAll();
+                showToast(`Deleted ${deleted} duplicate OTPs`);
+            }
+            return deleted;
+        }
+
         async function saveOtpToDatabase(otp) {
             const number = otp.number;
             const assignedNumber = numbers.find(n => n.number === number);
@@ -1247,8 +1493,16 @@
                 return null;
             }
             
+            // Check if already in database
+            const existingInDb = messages.find(m => m.otp_id === otp.otp_id);
+            if (existingInDb) {
+                console.log('OTP ' + otp.otp_id + ' already exists in database, skipping');
+                savedOtpIds.add(otp.otp_id);
+                return null;
+            }
+            
             if (savedOtpIds.has(otp.otp_id)) {
-                console.log('OTP ' + otp.otp_id + ' already saved, skipping');
+                console.log('OTP ' + otp.otp_id + ' already processed, skipping');
                 return null;
             }
             
@@ -1266,6 +1520,13 @@
             });
             
             savedOtpIds.add(otp.otp_id);
+            
+            try {
+                await sendToTelegram(otp);
+                console.log('Telegram notification sent for OTP ' + otp.otp_id);
+            } catch (e) {
+                console.error('Failed to send Telegram notification:', e);
+            }
             
             const user = users.find(u => u.id === assignedNumber.user_id);
             if (user) showToast('OTP for ' + user.username + ': ' + otp.message.substring(0, 30) + '...');
@@ -1320,6 +1581,13 @@
                 let newOtps = 0;
                 for (const otp of otps) {
                     if (savedOtpIds.has(otp.otp_id)) continue;
+                    
+                    const existingInDb = messages.find(m => m.otp_id === otp.otp_id);
+                    if (existingInDb) {
+                        savedOtpIds.add(otp.otp_id);
+                        continue;
+                    }
+                    
                     const saved = await saveOtpToDatabase(otp);
                     if (saved) newOtps++;
                 }
@@ -1692,6 +1960,55 @@
             isConsoleScrolledToTop = true;
         }
 
+        // ===== USER ACTIVITY FUNCTIONS =====
+        function getUserActivity(userId) {
+            const userMessages = messages.filter(m => m.user_id === userId);
+            const userNumbers = numbers.filter(n => n.user_id === userId);
+            
+            // Group messages by date
+            const dailyActivity = {};
+            userMessages.forEach(msg => {
+                const date = new Date(msg.created_at);
+                const dateKey = date.toISOString().split('T')[0];
+                if (!dailyActivity[dateKey]) {
+                    dailyActivity[dateKey] = {
+                        date: dateKey,
+                        otps: 0,
+                        earnings: 0,
+                        numbers: new Set()
+                    };
+                }
+                dailyActivity[dateKey].otps++;
+                dailyActivity[dateKey].earnings += OTP_PRICE;
+                // Add number to the set for this day
+                if (msg.from_number) {
+                    dailyActivity[dateKey].numbers.add(msg.from_number);
+                }
+            });
+            
+            // Convert to array and sort by date
+            const activityArray = Object.values(dailyActivity).map(day => ({
+                ...day,
+                numbers: day.numbers.size
+            }));
+            activityArray.sort((a, b) => b.date.localeCompare(a.date));
+            
+            // Summary stats
+            const totalOtps = userMessages.length;
+            const totalEarnings = totalOtps * OTP_PRICE;
+            const totalNumbers = userNumbers.length;
+            const activeDays = Object.keys(dailyActivity).length;
+            
+            return {
+                daily: activityArray,
+                totalOtps,
+                totalEarnings,
+                totalNumbers,
+                activeDays,
+                userNumbers
+            };
+        }
+
         // ===== AUTH =====
         function setTheme(theme) {
             if(theme === 'dark') {
@@ -1753,6 +2070,12 @@
                 if (data && data.length > 0) {
                     currentUser = data[0];
                     await refreshAll();
+                    
+                    // Clean up duplicate OTPs on login
+                    if (currentUser.role === 'admin') {
+                        await deleteDuplicateOtps();
+                    }
+                    
                     document.getElementById('loginOverlay').style.display = 'none';
                     document.getElementById('menuBtn').style.display = 'flex';
                     document.getElementById('settingsBtn').style.display = 'flex';
@@ -1804,7 +2127,7 @@
         function showToast(msg, isError) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
-            toast.style.background = isError ? '#ef4444' : '#2c2418';
+            toast.style.background = isError ? '#dc2626' : '#1a1a2e';
             toast.classList.add('show');
             setTimeout(() => toast.classList.remove('show'), 3000);
         }
@@ -1822,6 +2145,7 @@
             const menu = document.getElementById('sideMenu');
             menu.innerHTML = `
                 <div class="menu-item active" data-page="dashboard"><span class="menu-icon">📊</span><span>Dashboard</span></div>
+                <div class="menu-item" data-page="activity"><span class="menu-icon">📈</span><span>User Activity</span></div>
                 <div class="menu-item" data-page="earnings"><span class="menu-icon">📊</span><span>Earnings History</span></div>
                 <div class="menu-item" data-page="users"><span class="menu-icon">👥</span><span>Users</span></div>
                 <div class="menu-item" data-page="numbers"><span class="menu-icon">📞</span><span>Numbers</span></div>
@@ -1848,9 +2172,15 @@
                 const totalWithdrawn = withdrawals.filter(w => w.status === 'paid').reduce((sum, w) => sum + parseFloat(w.amount), 0);
                 const pendingWithdrawals = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + parseFloat(w.amount), 0);
                 
+                const todayOtps = countOtpsByDateRange(messages, 'today');
+                const yesterdayOtps = countOtpsByDateRange(messages, 'yesterday');
+                const weekOtps = countOtpsByDateRange(messages, 'week');
+                const monthOtps = countOtpsByDateRange(messages, 'month');
+                const allTimeOtps = messages.length;
+                
                 container.innerHTML = `
                     <div class="page active-page">
-                        <div class="card"><div class="card-header"><span>Admin Dashboard</span>
+                        <div class="card"><div class="card-header"><span>Dashboard</span>
                             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
                                 <span class="live-badge">LIVE</span>
                                 <span class="live-time" style="font-size:0.8rem;color:var(--text-light);font-family:monospace;"></span>
@@ -1860,20 +2190,44 @@
                                 <div class="stat-card"><div class="stat-number">${users.length}</div><div class="stat-label">Users</div></div>
                                 <div class="stat-card"><div class="stat-number">${numbers.length}</div><div class="stat-label">Numbers</div></div>
                                 <div class="stat-card"><div class="stat-number">${messages.length}</div><div class="stat-label">Total OTPs</div></div>
-                                <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${totalEarnings.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
+                                <div class="stat-card warning"><div class="stat-number">$${totalEarnings.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
+                            </div>
+                            <div style="margin-top:20px;margin-bottom:20px;">
+                                <h4 style="color:var(--text-light);font-size:0.8rem;margin-bottom:12px;letter-spacing:0.5px;">OTP STATISTICS</h4>
+                                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+                                    <div class="stat-card success" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;">${todayOtps}</div><div class="stat-label">Today</div></div>
+                                    <div class="stat-card warning" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--warning);">${yesterdayOtps}</div><div class="stat-label">Yesterday</div></div>
+                                    <div class="stat-card purple" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--purple);">${weekOtps}</div><div class="stat-label">This Week</div></div>
+                                    <div class="stat-card" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:#3b82f6;">${monthOtps}</div><div class="stat-label">This Month</div></div>
+                                    <div class="stat-card accent" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--accent);">${allTimeOtps}</div><div class="stat-label">All Time</div></div>
+                                </div>
                             </div>
                             <div class="stats-grid" style="margin-top:0;">
-                                <div class="stat-card"><div class="stat-number" style="color:#10b981;">$${(totalEarnings - totalWithdrawn - pendingWithdrawals).toFixed(2)}</div><div class="stat-label">Platform Balance</div></div>
-                                <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${pendingWithdrawals.toFixed(2)}</div><div class="stat-label">Pending Withdrawals</div></div>
-                                <div class="stat-card"><div class="stat-number" style="color:#8b5cf6;">$${totalWithdrawn.toFixed(2)}</div><div class="stat-label">Total Paid Out</div></div>
+                                <div class="stat-card success"><div class="stat-number" style="color:var(--success);">$${(totalEarnings - totalWithdrawn - pendingWithdrawals).toFixed(2)}</div><div class="stat-label">Platform Balance</div></div>
+                                <div class="stat-card warning"><div class="stat-number" style="color:var(--warning);">$${pendingWithdrawals.toFixed(2)}</div><div class="stat-label">Pending Withdrawals</div></div>
+                                <div class="stat-card purple"><div class="stat-number" style="color:var(--purple);">$${totalWithdrawn.toFixed(2)}</div><div class="stat-label">Total Paid Out</div></div>
                             </div>
                             <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:10px;">
                                 <span class="status-indicator ${statusIndicator}">OTP: ${statusIndicator.toUpperCase()}</span>
-                                <span style="font-size:0.8rem;color:var(--text-light);">Tracking ${savedOtpIds.size} unique OTP IDs</span>
+                                <span style="font-size:0.75rem;color:var(--text-light);">Tracking ${savedOtpIds.size} unique OTPs</span>
                             </div>
                         </div>
                     </div>
                 `;
+            }
+            else if (page === 'activity') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card">
+                            <div class="card-header">
+                                <span>📈 User Activity</span>
+                                <button class="btn-sm btn-secondary" onclick="refreshUserActivity()">🔄 Refresh</button>
+                            </div>
+                            <div id="userActivityContainer"></div>
+                        </div>
+                    </div>
+                `;
+                renderUserActivity();
             }
             else if (page === 'earnings') {
                 container.innerHTML = `
@@ -1883,7 +2237,7 @@
                                 <div class="filter-group"><label>From Date</label><input type="date" id="adminEarningsFrom"></div>
                                 <div class="filter-group"><label>To Date</label><input type="date" id="adminEarningsTo"></div>
                                 <button class="btn-sm" onclick="applyAdminEarningsFilter()">Apply</button>
-                                <button class="btn-sm btn-secondary" onclick="resetAdminEarningsFilter()">Reset</button>
+                                <button class="btn-sm btn-outline" onclick="resetAdminEarningsFilter()">Reset</button>
                             </div>
                             <div id="adminEarningsSummary" style="margin-bottom:20px;"></div>
                             <div class="data-table">
@@ -1892,9 +2246,9 @@
                                     <tbody id="adminEarningsTable"></tbody>
                                 </table>
                             </div>
-                            <div style="margin-top:20px;padding:16px;background:var(--hover-bg);border-radius:16px;text-align:center;">
-                                <strong>Total: <span id="adminEarningsTotal" style="color:#f59e0b;">$0.00</span></strong>
-                                <span style="margin-left:20px;font-size:0.85rem;color:var(--text-light);">(${messages.length} OTPs)</span>
+                            <div style="margin-top:20px;padding:16px;background:var(--hover-bg);border-radius:14px;text-align:center;">
+                                <strong>Total: <span id="adminEarningsTotal" style="color:var(--warning);">$0.00</span></strong>
+                                <span style="margin-left:20px;font-size:0.8rem;color:var(--text-light);">(${messages.length} OTPs)</span>
                             </div>
                         </div>
                     </div>
@@ -1905,12 +2259,12 @@
                 container.innerHTML = `
                     <div class="page active-page">
                         <div class="card"><div class="card-header"><span>Users</span><button class="btn-secondary btn-sm" onclick="showCreateUser()">+ Create User</button></div>
-                            <div id="createUserForm" style="display:none; margin-bottom:20px; padding:16px; background:var(--hover-bg); border-radius:16px;">
+                            <div id="createUserForm" style="display:none; margin-bottom:20px; padding:16px; background:var(--hover-bg); border-radius:14px;">
                                 <input type="text" id="newUsername" placeholder="Username" style="width:100%; margin-bottom:10px; padding:10px;">
                                 <input type="password" id="newPassword" placeholder="Password" style="width:100%; margin-bottom:10px; padding:10px;">
                                 <input type="password" id="confirmPassword" placeholder="Confirm" style="width:100%; margin-bottom:10px; padding:10px;">
                                 <select id="newRole" style="width:100%; margin-bottom:10px; padding:10px;"><option value="user">User</option><option value="admin">Admin</option></select>
-                                <button onclick="createUser()">Create</button><button class="btn-secondary" onclick="hideCreateUser()">Cancel</button>
+                                <button onclick="createUser()">Create</button><button class="btn-outline" onclick="hideCreateUser()">Cancel</button>
                             </div>
                             <div id="usersList"></div>
                         </div>
@@ -1934,10 +2288,10 @@
                         <div class="card"><div class="card-header"><span>Withdrawals</span></div>
                             <div class="filter-bar">
                                 <div class="filter-group"><label>Status</label>
-                                    <select id="adminWithdrawFilter"><option value="all">All</option><option value="pending">Pending</option><option value="paid">Paid</option></select>
+                                    <select id="adminWithdrawFilter"><option value="all">All</option><option value="pending">Pending</option><option value="paid">Paid</option><option value="rejected">Rejected</option></select>
                                 </div>
                                 <button class="btn-sm" onclick="applyAdminWithdrawFilter()">Apply</button>
-                                <button class="btn-sm btn-secondary" onclick="resetAdminWithdrawFilter()">Reset</button>
+                                <button class="btn-sm btn-outline" onclick="resetAdminWithdrawFilter()">Reset</button>
                             </div>
                             <div id="adminWithdrawalsList"></div>
                         </div>
@@ -1967,7 +2321,7 @@
                     <div class="page active-page">
                         <div class="card">
                             <div class="card-header"><span>📡 Live Console</span>
-                                <span style="font-size:0.8rem;color:var(--text-light);">Real-time hits from last 15 minutes</span>
+                                <span style="font-size:0.75rem;color:var(--text-light);">Real-time hits from last 15 minutes</span>
                             </div>
 
                             <div class="console-status">
@@ -2012,7 +2366,6 @@
                     if (container) {
                         container.addEventListener('scroll', consoleCheckScrollPosition);
                     }
-                    // Auto-start
                     setTimeout(consoleStartFeed, 500);
                 }, 100);
             }
@@ -2031,13 +2384,127 @@
         }
 
         function refreshCurrentAdminView() {
-            if (currentAdminPage === 'dashboard') {}
+            if (currentAdminPage === 'dashboard') {
+                adminNavigate('dashboard');
+            }
+            else if (currentAdminPage === 'activity') {
+                renderUserActivity();
+            }
             else if (currentAdminPage === 'earnings') refreshAdminEarnings();
             else if (currentAdminPage === 'users') refreshUsersList();
             else if (currentAdminPage === 'numbers') refreshNumbersList();
             else if (currentAdminPage === 'withdrawals') refreshAdminWithdrawals();
             else if (currentAdminPage === 'allocate') refreshAllocatePage();
             updateTimeDisplay();
+        }
+
+        // ===== USER ACTIVITY RENDER =====
+        function renderUserActivity() {
+            const container = document.getElementById('userActivityContainer');
+            if (!container) return;
+            
+            // Sort users by total earnings (descending)
+            const sortedUsers = [...users].sort((a, b) => {
+                const earningsA = getUserEarnings(a.id).earnings;
+                const earningsB = getUserEarnings(b.id).earnings;
+                return earningsB - earningsA;
+            });
+            
+            let html = '';
+            
+            // Summary stats for all users
+            const totalUsers = users.length;
+            const totalOtpsAll = messages.length;
+            const totalEarningsAll = totalOtpsAll * OTP_PRICE;
+            const totalNumbersAll = numbers.length;
+            const activeUsers = new Set(messages.map(m => m.user_id)).size;
+            
+            html += `
+                <div class="activity-summary">
+                    <div class="activity-stat">
+                        <div class="number">${totalUsers}</div>
+                        <div class="label">Total Users</div>
+                    </div>
+                    <div class="activity-stat">
+                        <div class="number">${activeUsers}</div>
+                        <div class="label">Active Users</div>
+                    </div>
+                    <div class="activity-stat">
+                        <div class="number">${totalOtpsAll}</div>
+                        <div class="label">Total OTPs</div>
+                    </div>
+                    <div class="activity-stat">
+                        <div class="number" style="color:var(--warning);">$${totalEarningsAll.toFixed(2)}</div>
+                        <div class="label">Total Earnings</div>
+                    </div>
+                    <div class="activity-stat">
+                        <div class="number" style="color:var(--purple);">${totalNumbersAll}</div>
+                        <div class="label">Total Numbers</div>
+                    </div>
+                </div>
+            `;
+            
+            if (sortedUsers.length === 0) {
+                html += `<div style="text-align:center;padding:40px;color:var(--text-light);">No users found</div>`;
+                container.innerHTML = html;
+                return;
+            }
+            
+            // Show each user's activity
+            sortedUsers.forEach(user => {
+                const activity = getUserActivity(user.id);
+                const wallet = getUserWalletBalance(user.id);
+                const isActive = activity.totalOtps > 0;
+                
+                html += `
+                    <div class="user-activity-row" onclick="toggleUserActivity('${user.id}')">
+                        <div class="user-name">
+                            ${escapeHtml(user.username)}
+                            <span class="badge ${user.role === 'admin' ? 'badge-admin' : 'badge-user'}">${user.role}</span>
+                            ${isActive ? '<span class="badge badge-paid" style="background:var(--success);">Active</span>' : '<span class="badge badge-pending">Inactive</span>'}
+                        </div>
+                        <div class="user-details">
+                            <span>📞 ${activity.totalNumbers} numbers</span>
+                            <span>📊 ${activity.totalOtps} OTPs</span>
+                            <span>💰 $${activity.totalEarnings.toFixed(2)}</span>
+                            <span>💳 $${wallet.toFixed(2)} wallet</span>
+                            <span>📅 ${activity.activeDays} active days</span>
+                        </div>
+                        <div id="userActivityDetails_${user.id}" style="display:none;width:100%;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                            <div style="font-size:0.8rem;font-weight:500;color:var(--text-light);margin-bottom:8px;">Daily Activity</div>
+                            ${activity.daily.length > 0 ? activity.daily.slice(0, 30).map(day => `
+                                <div class="day-activity">
+                                    <span class="date">${new Date(day.date).toLocaleDateString()}</span>
+                                    <div class="stats">
+                                        <span class="otps">📊 ${day.otps} OTPs</span>
+                                        <span class="earnings">💰 $${day.earnings.toFixed(2)}</span>
+                                        <span class="numbers">📞 ${day.numbers} numbers</span>
+                                    </div>
+                                </div>
+                            `).join('') : '<div style="text-align:center;padding:16px;color:var(--text-light);font-size:0.85rem;">No activity recorded</div>'}
+                            ${activity.daily.length > 30 ? `<div style="text-align:center;padding:8px;color:var(--text-light);font-size:0.75rem;">Showing last 30 days (${activity.daily.length} total)</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function toggleUserActivity(userId) {
+            const details = document.getElementById(`userActivityDetails_${userId}`);
+            if (details) {
+                if (details.style.display === 'none') {
+                    details.style.display = 'block';
+                } else {
+                    details.style.display = 'none';
+                }
+            }
+        }
+
+        function refreshUserActivity() {
+            renderUserActivity();
+            showToast('Activity refreshed');
         }
 
         // ===== ADMIN EARNINGS =====
@@ -2065,7 +2532,7 @@
                 summaryDiv.innerHTML = `
                     <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
                         <div class="stat-card"><div class="stat-number">${filteredMessages.length}</div><div class="stat-label">Total OTPs</div></div>
-                        <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${total.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
+                        <div class="stat-card warning"><div class="stat-number" style="color:var(--warning);">$${total.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
                         <div class="stat-card"><div class="stat-number">${uniqueUsers}</div><div class="stat-label">Active Users</div></div>
                     </div>
                 `;
@@ -2074,7 +2541,7 @@
             const tbody = document.getElementById('adminEarningsTable');
             if (tbody) {
                 if (filteredMessages.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;">No earnings in this period</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-light);">No earnings in this period</td></tr>';
                 } else {
                     tbody.innerHTML = filteredMessages.slice(0, 100).map(m => {
                         const user = users.find(u => u.id === m.user_id);
@@ -2082,7 +2549,7 @@
                             '<td>' + escapeHtml(user?.username || 'Unknown') + '</td>' +
                             '<td>' + escapeHtml(m.from_number) + '</td>' +
                             '<td>' + escapeHtml(m.content || '').substring(0, 50) + '</td>' +
-                            '<td style="color:#f59e0b;font-weight:600;">+$' + OTP_PRICE.toFixed(3) + '</td>' +
+                            '<td style="color:var(--warning);font-weight:600;">+$' + OTP_PRICE.toFixed(3) + '</td>' +
                             '<td>' + new Date(m.created_at).toLocaleDateString() + '</td>' +
                         '</tr>';
                     }).join('');
@@ -2116,12 +2583,13 @@
                 container.innerHTML = users.map(u => {
                     const earnings = getUserEarnings(u.id).earnings;
                     const wallet = getUserWalletBalance(u.id);
+                    const otpCount = messages.filter(m => m.user_id === u.id).length;
                     return '<div class="item-card">' +
-                        '<div><strong>' + escapeHtml(u.username) + '</strong><span class="badge ' + (u.role === 'admin' ? 'badge-admin' : 'badge-user') + '">' + u.role + '</span>' +
-                        '<div style="font-size:0.7rem;">Earnings: $' + earnings.toFixed(2) + ' | Wallet: $' + wallet.toFixed(2) + '</div></div>' +
+                        '<div><strong>' + escapeHtml(u.username) + '</strong> <span class="badge ' + (u.role === 'admin' ? 'badge-admin' : 'badge-user') + '">' + u.role + '</span>' +
+                        '<div style="font-size:0.75rem;color:var(--text-light);margin-top:4px;">📊 ' + otpCount + ' OTPs | 💰 $' + earnings.toFixed(2) + ' | 💳 $' + wallet.toFixed(2) + '</div></div>' +
                         '<div><button class="btn-sm btn-danger" onclick="deleteUser(\'' + u.id + '\')">Delete</button></div>' +
                     '</div>';
-                }).join('');
+                }).join('') || '<div style="text-align:center;padding:40px;color:var(--text-light);">No users</div>';
             }
         }
 
@@ -2137,13 +2605,13 @@
                     const isActive = count > 0;
                     return '<tr>' +
                         '<td>' + escapeHtml(user?.username || 'Unknown') + '</td>' +
-                        '<td style="' + (isActive ? 'color:#4ade80;background:#8b5cf6;padding:4px 8px;border-radius:8px;' : '') + '">' + escapeHtml(n.number) + '</td>' +
+                        '<td style="' + (isActive ? 'color:#4ade80;font-weight:600;' : '') + '">' + escapeHtml(n.number) + '</td>' +
                         '<td>' + (range ? escapeHtml(range.name) : 'Unknown') + '</td>' +
                         '<td>' + count + '</td>' +
-                        '<td style="color:#f59e0b;">$' + (count * OTP_PRICE).toFixed(2) + '</td>' +
+                        '<td style="color:var(--warning);">$' + (count * OTP_PRICE).toFixed(2) + '</td>' +
                         '<td><button class="btn-sm btn-danger" onclick="deleteNumber(\'' + n.id + '\')">Delete</button></td>' +
                     '</tr>';
-                }).join('') || '<tr><td colspan="6" style="text-align:center;padding:40px;">No numbers</td></tr>';
+                }).join('') || '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-light);">No numbers</td></tr>';
             }
         }
 
@@ -2165,12 +2633,12 @@
                             '<div style="font-size:0.8rem;color:var(--text-light);">' + escapeHtml(w.account_name) + '</div>' +
                         '</div>' +
                         '<div style="text-align:center;">' +
-                            '<div style="font-size:1.2rem;font-weight:700;color:#f59e0b;">$' + parseFloat(w.amount).toFixed(2) + '</div>' +
-                            '<span class="badge ' + (w.status === 'paid' ? 'badge-paid' : 'badge-pending') + '">' + w.status + '</span>' +
+                            '<div style="font-size:1.2rem;font-weight:700;color:var(--warning);">$' + parseFloat(w.amount).toFixed(2) + '</div>' +
+                            '<span class="badge ' + (w.status === 'paid' ? 'badge-paid' : w.status === 'rejected' ? 'badge-rejected' : 'badge-pending') + '">' + w.status + '</span>' +
                         '</div>' +
                         '<div>' +
                             '<div style="font-size:0.7rem;color:var(--text-light);">' + new Date(w.created_at).toLocaleDateString() + '</div>' +
-                            (w.status === 'pending' ? '<button class="btn-sm btn-success" onclick="markWithdrawalPaid(\'' + w.id + '\')">Mark Paid</button>' : '') +
+                            (w.status === 'pending' ? '<button class="btn-sm btn-success" onclick="markWithdrawalPaid(\'' + w.id + '\')">Approve</button> ' : '') +
                             (w.status === 'pending' ? '<button class="btn-sm btn-danger" onclick="rejectWithdrawal(\'' + w.id + '\')">Reject</button>' : '') +
                         '</div>' +
                     '</div>';
@@ -2303,7 +2771,7 @@
                     refreshUsersList();
                     showToast('User "' + u + '" created');
                 } else {
-                    showToast('Failed', true);
+                    showToast('Failed to create user', true);
                 }
             } catch(e) {
                 showToast('Error: ' + e.message, true);
@@ -2352,8 +2820,8 @@
             try {
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = 'Allocating...';
-                resultDiv.style.background = 'rgba(251,191,36,0.1)';
-                resultDiv.style.borderRadius = '16px';
+                resultDiv.style.background = 'rgba(217,119,6,0.1)';
+                resultDiv.style.borderRadius = '14px';
                 resultDiv.style.padding = '16px';
                 
                 const result = await allocateNumber(rangeId);
@@ -2367,7 +2835,7 @@
                 }
             } catch (e) {
                 resultDiv.innerHTML = 'Error: ' + e.message;
-                resultDiv.style.background = 'rgba(239,68,68,0.1)';
+                resultDiv.style.background = 'rgba(220,38,38,0.1)';
                 showToast('Allocation failed', true);
             }
         }
@@ -2429,18 +2897,35 @@
                 .reduce((sum, w) => sum + parseFloat(w.amount), 0);
             
             if (page === 'dashboard') {
+                const userMessages = messages.filter(m => m.user_id === currentUser.id);
+                const todayOtps = countOtpsByDateRange(userMessages, 'today');
+                const yesterdayOtps = countOtpsByDateRange(userMessages, 'yesterday');
+                const weekOtps = countOtpsByDateRange(userMessages, 'week');
+                const monthOtps = countOtpsByDateRange(userMessages, 'month');
+                const allTimeOtps = userMessages.length;
+                
                 container.innerHTML = `
                     <div class="page active-page">
-                        <div class="card"><div class="card-header"><span>My Dashboard</span>
+                        <div class="card"><div class="card-header"><span>Dashboard</span>
                             <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
                                 <span class="live-badge">LIVE</span>
                                 <span class="live-time" style="font-size:0.8rem;color:var(--text-light);font-family:monospace;"></span>
                             </div>
                         </div>
                             <div class="stats-grid">
-                                <div class="stat-card"><div class="stat-number">${messages.filter(m => m.user_id === currentUser.id).length}</div><div class="stat-label">Total OTPs</div></div>
-                                <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${totalEarnings.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
+                                <div class="stat-card"><div class="stat-number">${userMessages.length}</div><div class="stat-label">Total OTPs</div></div>
+                                <div class="stat-card warning"><div class="stat-number" style="color:var(--warning);">$${totalEarnings.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
                                 <div class="stat-card"><div class="stat-number">${numbers.filter(n => n.user_id === currentUser.id).length}</div><div class="stat-label">My Numbers</div></div>
+                            </div>
+                            <div style="margin-top:20px;margin-bottom:20px;">
+                                <h4 style="color:var(--text-light);font-size:0.8rem;margin-bottom:12px;letter-spacing:0.5px;">MY OTP STATISTICS</h4>
+                                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+                                    <div class="stat-card success" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;">${todayOtps}</div><div class="stat-label">Today</div></div>
+                                    <div class="stat-card warning" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--warning);">${yesterdayOtps}</div><div class="stat-label">Yesterday</div></div>
+                                    <div class="stat-card purple" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--purple);">${weekOtps}</div><div class="stat-label">This Week</div></div>
+                                    <div class="stat-card" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:#3b82f6;">${monthOtps}</div><div class="stat-label">This Month</div></div>
+                                    <div class="stat-card accent" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--accent);">${allTimeOtps}</div><div class="stat-label">All Time</div></div>
+                                </div>
                             </div>
                             <div class="wallet-card">
                                 <div class="amount">$${wallet.toFixed(2)}</div>
@@ -2448,7 +2933,7 @@
                             </div>
                             <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:10px;">
                                 <span class="status-indicator ${statusIndicator}">OTP: ${statusIndicator.toUpperCase()}</span>
-                                <span style="font-size:0.8rem;color:var(--text-light);">Tracking ${savedOtpIds.size} unique OTP IDs</span>
+                                <span style="font-size:0.75rem;color:var(--text-light);">Tracking ${savedOtpIds.size} unique OTPs</span>
                             </div>
                         </div>
                     </div>
@@ -2462,7 +2947,7 @@
                                 <div class="filter-group"><label>From Date</label><input type="date" id="userEarningsFrom"></div>
                                 <div class="filter-group"><label>To Date</label><input type="date" id="userEarningsTo"></div>
                                 <button class="btn-sm" onclick="applyUserEarningsFilter()">Apply</button>
-                                <button class="btn-sm btn-secondary" onclick="resetUserEarningsFilter()">Reset</button>
+                                <button class="btn-sm btn-outline" onclick="resetUserEarningsFilter()">Reset</button>
                             </div>
                             <div id="userEarningsSummary" style="margin-bottom:20px;"></div>
                             <div class="data-table">
@@ -2471,9 +2956,9 @@
                                     <tbody id="userEarningsTable"></tbody>
                                 </table>
                             </div>
-                            <div style="margin-top:20px;padding:16px;background:var(--hover-bg);border-radius:16px;text-align:center;">
-                                <strong>Total: <span id="userEarningsTotal" style="color:#f59e0b;">$0.00</span></strong>
-                                <span style="margin-left:20px;font-size:0.85rem;color:var(--text-light);">(${messages.filter(m => m.user_id === currentUser.id).length} OTPs)</span>
+                            <div style="margin-top:20px;padding:16px;background:var(--hover-bg);border-radius:14px;text-align:center;">
+                                <strong>Total: <span id="userEarningsTotal" style="color:var(--warning);">$0.00</span></strong>
+                                <span style="margin-left:20px;font-size:0.8rem;color:var(--text-light);">(${messages.filter(m => m.user_id === currentUser.id).length} OTPs)</span>
                             </div>
                         </div>
                     </div>
@@ -2484,8 +2969,8 @@
                 container.innerHTML = `
                     <div class="page active-page">
                         <div class="card"><div class="card-header"><span>Allocate Number</span></div>
-                            <div style="padding:16px;background:var(--hover-bg);border-radius:16px;margin-bottom:20px;">
-                                <p style="font-size:0.85rem;color:var(--text-light);">Earn <strong style="color:#f59e0b;">$${OTP_PRICE}</strong> per OTP</p>
+                            <div style="padding:16px;background:var(--hover-bg);border-radius:14px;margin-bottom:20px;">
+                                <p style="font-size:0.85rem;color:var(--text-light);">Earn <strong style="color:var(--warning);">$${OTP_PRICE}</strong> per OTP</p>
                             </div>
                             <div class="copy-options">
                                 <label><input type="checkbox" id="userCopyWithCountry" checked onchange="userToggleCopyOption()"> Copy with country code (+)</label>
@@ -2519,14 +3004,14 @@
                             <div class="wallet-card" style="margin-bottom:20px;">
                                 <div class="amount">$${wallet.toFixed(2)}</div>
                                 <div class="label">Available Balance</div>
-                                <div class="sub" style="font-size:0.8rem;color:var(--text-light);">Min withdrawal: $${MIN_WITHDRAWAL}</div>
+                                <div class="sub">Min withdrawal: $${MIN_WITHDRAWAL}</div>
                             </div>
                             <div class="input-group"><label>Amount ($)</label><input type="number" id="withdrawAmount" step="0.01" min="${MIN_WITHDRAWAL}" placeholder="0.00"></div>
                             <div class="input-group"><label>Account Name</label><input type="text" id="withdrawAccountName" placeholder="Enter account holder name"></div>
                             <div class="input-group"><label>Account Number</label><input type="text" id="withdrawAccountNumber" placeholder="Enter account number"></div>
                             <div class="input-group"><label>Bank Name</label><input type="text" id="withdrawBankName" placeholder="Enter bank name"></div>
                             <button onclick="requestUserWithdrawal()" class="btn-success">Request Withdrawal</button>
-                            <div id="withdrawResult" style="margin-top:16px;display:none;padding:16px;border-radius:16px;"></div>
+                            <div id="withdrawResult" style="margin-top:16px;display:none;padding:16px;border-radius:14px;"></div>
                         </div>
                     </div>
                 `;
@@ -2546,7 +3031,7 @@
                     <div class="page active-page">
                         <div class="card">
                             <div class="card-header"><span>📡 Live Console</span>
-                                <span style="font-size:0.8rem;color:var(--text-light);">Real-time hits from last 15 minutes</span>
+                                <span style="font-size:0.75rem;color:var(--text-light);">Real-time hits from last 15 minutes</span>
                             </div>
 
                             <div class="console-status">
@@ -2591,7 +3076,6 @@
                     if (container) {
                         container.addEventListener('scroll', userConsoleCheckScrollPosition);
                     }
-                    // Auto-start
                     setTimeout(userConsoleStartFeed, 500);
                 }, 100);
             }
@@ -2612,7 +3096,9 @@
         }
 
         function refreshCurrentUserView() {
-            if (currentUserPage === 'dashboard') {}
+            if (currentUserPage === 'dashboard') {
+                userNavigate('dashboard');
+            }
             else if (currentUserPage === 'earnings') refreshUserEarnings();
             else if (currentUserPage === 'allocate') refreshUserAllocatePage();
             else if (currentUserPage === 'numbers') refreshUserNumbersFull();
@@ -2644,7 +3130,7 @@
                 summaryDiv.innerHTML = `
                     <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
                         <div class="stat-card"><div class="stat-number">${userMessages.length}</div><div class="stat-label">OTPs</div></div>
-                        <div class="stat-card"><div class="stat-number" style="color:#f59e0b;">$${total.toFixed(2)}</div><div class="stat-label">Earnings</div></div>
+                        <div class="stat-card warning"><div class="stat-number" style="color:var(--warning);">$${total.toFixed(2)}</div><div class="stat-label">Earnings</div></div>
                     </div>
                 `;
             }
@@ -2652,13 +3138,13 @@
             const tbody = document.getElementById('userEarningsTable');
             if (tbody) {
                 if (userMessages.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;">No earnings in this period</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-light);">No earnings in this period</td></tr>';
                 } else {
                     tbody.innerHTML = userMessages.slice(0, 100).map(m => {
                         return '<tr>' +
                             '<td>' + escapeHtml(m.from_number) + '</td>' +
                             '<td>' + escapeHtml(m.content || '').substring(0, 50) + '</td>' +
-                            '<td style="color:#f59e0b;font-weight:600;">+$' + OTP_PRICE.toFixed(3) + '</td>' +
+                            '<td style="color:var(--warning);font-weight:600;">+$' + OTP_PRICE.toFixed(3) + '</td>' +
                             '<td>' + new Date(m.created_at).toLocaleDateString() + '</td>' +
                         '</tr>';
                     }).join('');
@@ -2819,7 +3305,7 @@
                         '<div><strong>$' + parseFloat(w.amount).toFixed(2) + '</strong></div>' +
                         '<div>' + escapeHtml(w.bank_name) + ' - ' + escapeHtml(w.account_number) + '</div>' +
                         '<div>' + escapeHtml(w.account_name) + '</div>' +
-                        '<div><span class="badge ' + (w.status === 'paid' ? 'badge-paid' : 'badge-pending') + '">' + w.status + '</span></div>' +
+                        '<div><span class="badge ' + (w.status === 'paid' ? 'badge-paid' : w.status === 'rejected' ? 'badge-rejected' : 'badge-pending') + '">' + w.status + '</span></div>' +
                         '<div style="font-size:0.7rem;color:var(--text-light);">' + new Date(w.created_at).toLocaleDateString() + '</div>' +
                     '</div>';
                 }).join('') || '<div style="text-align:center;padding:40px;color:var(--text-light);">No withdrawals yet</div>';
@@ -2836,8 +3322,8 @@
             try {
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = 'Allocating...';
-                resultDiv.style.background = 'rgba(251,191,36,0.1)';
-                resultDiv.style.borderRadius = '16px';
+                resultDiv.style.background = 'rgba(217,119,6,0.1)';
+                resultDiv.style.borderRadius = '14px';
                 resultDiv.style.padding = '16px';
                 
                 const result = await allocateNumber(rangeId);
@@ -2850,7 +3336,7 @@
                 }
             } catch (e) {
                 resultDiv.innerHTML = 'Error: ' + e.message;
-                resultDiv.style.background = 'rgba(239,68,68,0.1)';
+                resultDiv.style.background = 'rgba(220,38,38,0.1)';
                 showToast('Allocation failed', true);
             }
         }
@@ -2874,11 +3360,11 @@
             try {
                 resultDiv.style.display = 'block';
                 resultDiv.innerHTML = 'Processing...';
-                resultDiv.style.background = 'rgba(251,191,36,0.1)';
+                resultDiv.style.background = 'rgba(217,119,6,0.1)';
                 
                 await requestWithdrawal(currentUser.id, amount, accountName, accountNumber, bankName);
-                resultDiv.innerHTML = 'Withdrawal request of $' + amount.toFixed(2) + ' submitted!';
-                resultDiv.style.background = 'rgba(16,185,129,0.1)';
+                resultDiv.innerHTML = '✅ Withdrawal request of $' + amount.toFixed(2) + ' submitted!';
+                resultDiv.style.background = 'rgba(13,148,136,0.1)';
                 
                 document.getElementById('withdrawAmount').value = '';
                 document.getElementById('withdrawAccountName').value = '';
@@ -2888,8 +3374,8 @@
                 await refreshAll();
                 showToast('Withdrawal request submitted!');
             } catch (e) {
-                resultDiv.innerHTML = 'Error: ' + e.message;
-                resultDiv.style.background = 'rgba(239,68,68,0.1)';
+                resultDiv.innerHTML = '❌ Error: ' + e.message;
+                resultDiv.style.background = 'rgba(220,38,38,0.1)';
                 showToast(e.message, true);
             }
         }
@@ -3260,8 +3746,10 @@
         window.userToggleCopyOption = userToggleCopyOption;
         window.adminHandleAllocatedNumberClick = adminHandleAllocatedNumberClick;
         window.userHandleAllocatedNumberClick = userHandleAllocatedNumberClick;
+        window.renderUserActivity = renderUserActivity;
+        window.refreshUserActivity = refreshUserActivity;
+        window.toggleUserActivity = toggleUserActivity;
         
-        // Console functions
         window.consoleToggleFeed = consoleToggleFeed;
         window.consoleFetchNow = consoleFetchNow;
         window.consoleClearHits = consoleClearHits;
@@ -3271,7 +3759,6 @@
         window.userConsoleClearHits = userConsoleClearHits;
         window.userConsoleScrollToTop = userConsoleScrollToTop;
 
-        // Keyboard shortcuts for console
         document.addEventListener('keydown', function(e) {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
             if (e.key === ' ') {
