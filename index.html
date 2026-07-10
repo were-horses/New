@@ -1,0 +1,3743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>GENESYS_SMS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0a0a0f;
+            color: #e8e4dc;
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+        
+        body.light {
+            --primary: #2d6a4f;
+            --primary-dark: #1b4332;
+            --primary-light: #40916c;
+            --secondary: #d4a373;
+            --accent: #e76f51;
+            --text: #1a1a2e;
+            --text-light: #4a4a6a;
+            --border: #e0d6c8;
+            --card-bg: #ffffff;
+            --bg-page: #f5f0eb;
+            --shadow: rgba(0, 0, 0, 0.06);
+            --hover-bg: #f0ebe2;
+            --success: #0d9488;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --purple: #7c3aed;
+            --glass: rgba(255, 255, 255, 0.7);
+        }
+        
+        body.dark {
+            --primary: #40916c;
+            --primary-dark: #2d6a4f;
+            --primary-light: #52b788;
+            --secondary: #d4a373;
+            --accent: #e76f51;
+            --text: #e8e4dc;
+            --text-light: #9a9ab5;
+            --border: #2a2a4a;
+            --card-bg: #14141f;
+            --bg-page: #0a0a0f;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --hover-bg: #1f1f35;
+            --success: #0d9488;
+            --danger: #dc2626;
+            --warning: #d97706;
+            --purple: #7c3aed;
+            --glass: rgba(20, 20, 31, 0.8);
+        }
+        
+        body.light { background: var(--bg-page); }
+        body.dark { background: var(--bg-page); }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
+
+        .settings-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            width: 44px;
+            height: 44px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border: 1px solid var(--border);
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            color: var(--text);
+        }
+        .settings-btn:hover { transform: scale(1.05); background: var(--hover-bg); }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 24px;
+            max-width: 480px;
+            width: 100%;
+            padding: 32px;
+            border: 1px solid var(--border);
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .modal-close {
+            cursor: pointer;
+            font-size: 1.5rem;
+            line-height: 1;
+            color: var(--text-light);
+            transition: transform 0.2s;
+        }
+        .modal-close:hover { transform: rotate(90deg); }
+        
+        .theme-options { display: flex; gap: 16px; margin-top: 12px; flex-wrap: wrap; }
+        .theme-card {
+            flex: 1;
+            min-width: 100px;
+            padding: 16px;
+            border-radius: 16px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+            border: 2px solid var(--border);
+            background: var(--card-bg);
+        }
+        .theme-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .theme-card.selected { border-color: var(--primary); background: var(--hover-bg); }
+        .theme-preview {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            border: 2px solid var(--border);
+        }
+        .light-preview { background: linear-gradient(135deg, #f5f0eb, #ffffff); }
+        .dark-preview { background: linear-gradient(135deg, #0a0a0f, #14141f); }
+
+        .menu-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 44px;
+            height: 44px;
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        .menu-btn:hover { background: var(--hover-bg); }
+        .menu-btn span { width: 22px; height: 2px; background: var(--text); border-radius: 4px; transition: 0.3s; }
+
+        .side-menu {
+            position: fixed;
+            top: 0;
+            left: -300px;
+            width: 300px;
+            height: 100vh;
+            background: var(--card-bg);
+            box-shadow: 4px 0 30px rgba(0,0,0,0.2);
+            z-index: 999;
+            transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            padding: 80px 20px 20px;
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+        }
+        .side-menu.open { left: 0; }
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.4);
+            z-index: 998;
+            display: none;
+        }
+        .menu-overlay.show { display: block; }
+
+        .menu-item {
+            padding: 12px 16px;
+            margin-bottom: 6px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .menu-item:hover { background: var(--hover-bg); transform: translateX(4px); }
+        .menu-item.active { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(45, 106, 79, 0.3); }
+        .menu-icon { font-size: 1.2rem; width: 26px; text-align: center; }
+
+        .main-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 24px 30px;
+        }
+
+        .page { display: none; animation: fadeSlide 0.35s ease; }
+        .page.active-page { display: block; }
+        @keyframes fadeSlide {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 12px var(--shadow);
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        .card:hover { box-shadow: 0 4px 24px var(--shadow); }
+        .card-header {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-bottom: 14px;
+            border-bottom: 2px solid var(--border);
+            letter-spacing: -0.3px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .stat-card {
+            background: var(--hover-bg);
+            border-radius: 16px;
+            padding: 18px 16px;
+            text-align: center;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px var(--shadow); }
+        .stat-number { 
+            font-size: 1.8rem; 
+            font-weight: 700; 
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            line-height: 1.2;
+        }
+        .stat-label { 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px; 
+            color: var(--text-light); 
+            margin-top: 6px;
+            font-weight: 500;
+        }
+        .stat-card.accent .stat-number { color: var(--accent); }
+        .stat-card.warning .stat-number { color: var(--warning); }
+        .stat-card.success .stat-number { color: var(--success); }
+        .stat-card.purple .stat-number { color: var(--purple); }
+
+        .wallet-card {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 20px;
+            padding: 28px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 8px 30px rgba(45, 106, 79, 0.25);
+        }
+        .wallet-card .amount {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+        .wallet-card .label {
+            font-size: 0.8rem;
+            opacity: 0.8;
+            margin-top: 4px;
+            letter-spacing: 0.5px;
+        }
+        .wallet-card .sub {
+            font-size: 0.75rem;
+            opacity: 0.6;
+            margin-top: 8px;
+        }
+
+        .login-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .login-box {
+            background: var(--card-bg);
+            border-radius: 28px;
+            padding: 44px 36px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.4);
+            border: 1px solid var(--border);
+        }
+        .login-box h2 { 
+            text-align: center; 
+            margin-bottom: 32px; 
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1.8rem;
+            letter-spacing: -0.5px;
+        }
+        .login-error { 
+            background: rgba(220, 38, 38, 0.1); 
+            color: var(--danger); 
+            padding: 12px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            display: none; 
+            text-align: center; 
+            font-size: 0.85rem;
+            border: 1px solid rgba(220, 38, 38, 0.2);
+        }
+
+        .input-group { margin-bottom: 18px; }
+        label { 
+            display: block; 
+            font-weight: 500; 
+            margin-bottom: 6px; 
+            color: var(--text); 
+            font-size: 0.8rem;
+            letter-spacing: 0.3px;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 14px;
+            font-size: 0.95rem;
+            background: var(--card-bg);
+            color: var(--text);
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.1);
+        }
+
+        button {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            letter-spacing: 0.2px;
+        }
+        button:hover { background: var(--primary-dark); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(45, 106, 79, 0.25); }
+        button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-secondary { background: var(--secondary); }
+        .btn-secondary:hover { background: #c49a6b; }
+        .btn-danger { background: var(--danger); }
+        .btn-danger:hover { background: #b91c1c; box-shadow: 0 6px 20px rgba(220, 38, 38, 0.25); }
+        .btn-sm { padding: 8px 16px; font-size: 0.78rem; border-radius: 10px; }
+        .btn-success { background: var(--success); }
+        .btn-success:hover { background: #0f766e; box-shadow: 0 6px 20px rgba(13, 148, 136, 0.25); }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover { background: var(--hover-bg); box-shadow: none; transform: translateY(-2px); }
+
+        .data-table { overflow-x: auto; border-radius: 14px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 14px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        th { 
+            font-weight: 600; 
+            color: var(--text-light); 
+            font-size: 0.7rem; 
+            text-transform: uppercase; 
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid var(--border);
+        }
+        tr:hover td { background: var(--hover-bg); }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            display: inline-block;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .badge-pending { background: var(--warning); color: white; }
+        .badge-paid { background: var(--success); color: white; }
+        .badge-admin { background: var(--purple); color: white; }
+        .badge-user { background: var(--primary); color: white; }
+        .badge-rejected { background: var(--danger); color: white; }
+
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            margin-bottom: 20px;
+        }
+        .filter-group { flex: 1; min-width: 130px; }
+        .filter-group label { font-size: 0.7rem; margin-bottom: 4px; color: var(--text-light); }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text);
+            color: var(--card-bg);
+            padding: 14px 28px;
+            border-radius: 14px;
+            font-size: 0.85rem;
+            z-index: 1001;
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+            white-space: nowrap;
+            max-width: 90%;
+            font-weight: 500;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+        .live-badge {
+            background: var(--success);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+        .live-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: white;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .status-indicator {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+        }
+        .status-indicator.online { background: rgba(13, 148, 136, 0.15); color: var(--success); }
+        .status-indicator.offline { background: rgba(220, 38, 38, 0.15); color: var(--danger); }
+        .status-indicator.testing { background: rgba(217, 119, 6, 0.15); color: var(--warning); }
+
+        .number-card {
+            background: var(--hover-bg);
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        .number-card:hover { border-color: var(--primary); }
+        .number-card .number {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text);
+            font-family: 'Inter', monospace;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+        }
+        .number-card .number:hover { color: var(--primary); }
+        .number-card .details {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+        .number-card .earnings {
+            color: var(--warning);
+            font-weight: 600;
+        }
+        .number-card .otp-count {
+            font-weight: 600;
+        }
+        .number-card .country-code {
+            font-size: 0.6rem;
+            color: var(--text-light);
+            background: var(--border);
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .number-card.active {
+            background: var(--purple);
+            border-color: var(--purple);
+            box-shadow: 0 0 30px rgba(124, 58, 237, 0.15);
+        }
+        .number-card.active .number { color: white; }
+        .number-card.active .details { color: rgba(255,255,255,0.7); }
+        .number-card.active .earnings { color: #a78bfa; }
+        .number-card.active .otp-count { color: white; }
+        .number-card.active .country-code { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.8); }
+        .number-card.active .badge-otp { background: rgba(255,255,255,0.15); color: white; }
+
+        .badge-otp {
+            background: var(--primary);
+            color: white;
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 0.6rem;
+            font-weight: 600;
+        }
+
+        .item-card {
+            background: var(--hover-bg);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+        }
+        .item-card:hover { border-color: var(--primary); }
+
+        .console-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--hover-bg);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .console-status .dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        .console-status .dot.online { background: var(--success); animation: pulse 1.5s infinite; }
+        .console-status .dot.offline { background: var(--danger); }
+        .console-status .dot.checking { background: var(--warning); animation: pulse 0.8s infinite; }
+        .console-status .count {
+            color: var(--success);
+            font-weight: 600;
+        }
+        .console-status .time {
+            color: var(--text-light);
+            font-size: 12px;
+        }
+
+        .console-hits {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            max-height: 65vh;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .console-hits::-webkit-scrollbar { width: 4px; }
+        .console-hits::-webkit-scrollbar-track { background: transparent; }
+        .console-hits::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 4px; }
+
+        .console-hit {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 14px 16px;
+            border-left: 3px solid var(--success);
+            animation: slideIn 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            cursor: pointer;
+            position: relative;
+            border: 1px solid var(--border);
+        }
+        .console-hit:hover { transform: scale(1.01); border-color: var(--success); }
+        .console-hit:active { transform: scale(0.98); }
+        .console-hit .range {
+            font-weight: 700;
+            color: var(--success);
+            font-family: 'Inter', monospace;
+            font-size: 15px;
+            letter-spacing: 0.5px;
+            user-select: all;
+            cursor: copy;
+        }
+        .console-hit .range::before { content: '📋 '; font-size: 11px; opacity: 0.5; }
+        .console-hit .sid {
+            background: rgba(124, 58, 237, 0.15);
+            color: var(--purple);
+            padding: 2px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .console-hit .message {
+            color: var(--text);
+            font-size: 13px;
+            flex: 1;
+            min-width: 100px;
+        }
+        .console-hit .time {
+            color: var(--text-light);
+            font-size: 11px;
+            white-space: nowrap;
+        }
+        .console-hit .country-tag {
+            font-size: 0.6rem;
+            color: var(--text-light);
+            background: var(--border);
+            padding: 2px 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .console-hit .badge-new {
+            background: rgba(13, 148, 136, 0.15);
+            color: var(--success);
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 8px;
+            font-weight: 600;
+            animation: fadeBadge 3s ease forwards;
+        }
+        .console-hit .copied-toast {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--success);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 700;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .console-hit .copied-toast.show { opacity: 1; animation: popIn 0.3s ease; }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeBadge {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .console-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-light);
+        }
+        .console-empty .icon { font-size: 48px; margin-bottom: 16px; }
+
+        .console-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+            flex-wrap: wrap;
+        }
+        .console-controls button {
+            padding: 10px 20px;
+            background: var(--hover-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text);
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 80px;
+        }
+        .console-controls button:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        .console-controls button.primary {
+            background: var(--success);
+            color: white;
+            font-weight: 600;
+            border-color: var(--success);
+        }
+        .console-controls button.primary:hover { background: #0f766e; }
+        .console-controls button.primary.running {
+            background: var(--warning);
+            color: var(--text);
+            border-color: var(--warning);
+        }
+        .console-controls button.primary.running:hover { background: #b45309; }
+        .console-controls button.danger:hover {
+            background: var(--danger);
+            color: white;
+            border-color: var(--danger);
+        }
+        .console-footer {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 11px;
+            margin-top: 16px;
+        }
+        .console-footer kbd {
+            background: var(--hover-bg);
+            padding: 2px 10px;
+            border-radius: 6px;
+            font-size: 10px;
+            font-family: 'Inter', monospace;
+            border: 1px solid var(--border);
+        }
+        .console-scroll-indicator {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 11px;
+            padding: 6px;
+            background: var(--hover-bg);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: none;
+            border: 1px solid var(--border);
+        }
+        .console-scroll-indicator:hover { background: var(--primary); color: white; }
+        .console-scroll-indicator .arrow { display: inline-block; animation: bounce 1s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+
+        .console-toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 999;
+            pointer-events: none;
+            box-shadow: 0 8px 30px rgba(13, 148, 136, 0.3);
+        }
+        .console-toast.show { opacity: 1; transform: translateX(-50%) translateY(-10px); }
+
+        .allocated-result {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            border: 2px solid var(--success);
+            margin-top: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .allocated-result:hover { transform: scale(1.02); box-shadow: 0 0 40px rgba(13, 148, 136, 0.15); }
+        .allocated-result .number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success);
+            letter-spacing: 2px;
+            font-family: 'Inter', monospace;
+            cursor: copy;
+        }
+        .allocated-result .details {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+        .allocated-result .copy-hint {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 6px;
+            opacity: 0.6;
+        }
+        .allocated-result .copied-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--success);
+            color: white;
+            padding: 4px 14px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .allocated-result .copied-badge.show { opacity: 1; }
+
+        .copy-options {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--hover-bg);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .copy-options label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--text);
+        }
+        .copy-options input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--primary);
+        }
+
+        .activity-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+        .activity-stat {
+            background: var(--hover-bg);
+            border-radius: 14px;
+            padding: 16px 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        .activity-stat .number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+        .activity-stat .label {
+            font-size: 0.7rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+
+        .user-activity-row {
+            background: var(--hover-bg);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .user-activity-row:hover { border-color: var(--primary); transform: translateX(4px); }
+        .user-activity-row .user-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        .user-activity-row .user-details {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+        .user-activity-row .user-details span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .day-activity {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 6px;
+            border: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .day-activity .date {
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .day-activity .stats {
+            display: flex;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: var(--text-light);
+        }
+        .day-activity .stats .otps { color: var(--primary); font-weight: 600; }
+        .day-activity .stats .earnings { color: var(--warning); font-weight: 600; }
+        .day-activity .stats .numbers { color: var(--purple); font-weight: 600; }
+
+        @media (max-width: 768px) {
+            .main-content { padding: 70px 16px 20px; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .toast { white-space: normal; text-align: center; max-width: 80%; }
+            .console-hit {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .console-hit .time { align-self: flex-end; }
+            .allocated-result .number { font-size: 1.5rem; }
+            .activity-summary { grid-template-columns: 1fr 1fr; }
+            .user-activity-row .user-details { flex-direction: column; gap: 4px; }
+            .day-activity { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body class="light">
+    <div class="settings-btn" id="settingsBtn" style="display:none">⚙️</div>
+
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>⚙️</span>
+                <span>Settings</span>
+                <span class="modal-close" id="closeModalBtn">&times;</span>
+            </div>
+            <div style="margin-bottom: 28px;">
+                <h3 style="color: var(--primary); margin-bottom: 16px; font-size: 1.1rem;">Profile</h3>
+                <div class="input-group">
+                    <label>Current User</label>
+                    <input type="text" id="currentUserDisplay" readonly style="background: var(--hover-bg); cursor: default;">
+                </div>
+                <div class="input-group">
+                    <label>Old Password</label>
+                    <input type="password" id="oldPassword" placeholder="Enter old password">
+                </div>
+                <div class="input-group">
+                    <label>New Password</label>
+                    <input type="password" id="newPasswordField" placeholder="Enter new password (min 3 chars)">
+                </div>
+                <div class="input-group">
+                    <label>Confirm New Password</label>
+                    <input type="password" id="confirmNewPassword" placeholder="Confirm new password">
+                </div>
+                <button id="changePasswordBtn" class="btn-secondary">Change Password</button>
+            </div>
+            <hr style="border-color: var(--border); margin: 20px 0;">
+            <div>
+                <h3 style="color: var(--primary); margin-bottom: 16px; font-size: 1.1rem;">Panel Theme</h3>
+                <div class="theme-options">
+                    <div class="theme-card" data-theme="light" id="lightThemeBtn">
+                        <div class="theme-preview light-preview"></div>
+                        <div>Light</div>
+                    </div>
+                    <div class="theme-card" data-theme="dark" id="darkThemeBtn">
+                        <div class="theme-preview dark-preview"></div>
+                        <div>Dark</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="login-overlay" id="loginOverlay">
+        <div class="login-box">
+            <h2>GENESYS_SMS</h2>
+            <div class="login-error" id="loginError"></div>
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="loginUsername" placeholder="Enter username">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter password">
+            </div>
+            <button onclick="doLogin()" style="width:100%">Login</button>
+        </div>
+    </div>
+
+    <div class="menu-btn" id="menuBtn" style="display:none" onclick="toggleMenu()">
+        <span></span><span></span><span></span>
+    </div>
+
+    <div class="side-menu" id="sideMenu"></div>
+    <div class="menu-overlay" id="menuOverlay" onclick="toggleMenu()"></div>
+    <div class="main-content" id="mainContent"></div>
+    <div class="toast" id="toast"></div>
+    <div class="console-toast" id="consoleToast">📋 Copied!</div>
+
+    <script>
+        // ===== CONFIGURATION =====
+        const SUPABASE_URL = "https://auyudnqjokutmdwzrfmd.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1eXVkbnFqb2t1dG1kd3pyZm1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMDYxMTQsImV4cCI6MjA5NjU4MjExNH0.7RdElUcJXdzD02WZzFvPsErHv6RiEx8zBOvTxbpVI3g";
+        
+        const OTP_TOKEN = 'MHBXC3CY7VB';
+        const OTP_URL = 'https://api.2oo9.cloud/MXS47FLFX0U/tnevs/@public/api';
+        const OTP_PRICE = 0.005;
+        const MIN_WITHDRAWAL = 0.50;
+        
+        const TELEGRAM_BOT_TOKEN = "7325597357:AAGt0t9u-5GHR6VOVdXFMdzNqAsT572lPBk";
+        const TELEGRAM_CHAT_ID = "-1004290930965";
+        // =========================
+
+        let currentUser = null;
+        let users = [], numbers = [], ranges = [], messages = [], withdrawals = [];
+        let refreshInterval = null;
+        let otpPollingInterval = null;
+        let timerInterval = null;
+        let statusIndicator = 'testing';
+        let savedOtpIds = new Set();
+        let earningsFilterFrom = '';
+        let earningsFilterTo = '';
+        let allocatedNumber = null;
+        let copyWithCountry = false;
+
+        let consoleFeedInterval = null;
+        let isConsoleRunning = false;
+        let consoleHitCount = 0;
+        let consoleKnownHits = new Set();
+        let isConsoleScrolledToTop = true;
+
+        const COUNTRY_CODES = {
+            '224': { name: 'Guinea', flag: '🇬🇳' },
+            '221': { name: 'Senegal', flag: '🇸🇳' },
+            '223': { name: 'Mali', flag: '🇲🇱' },
+            '225': { name: 'Ivory Coast', flag: '🇨🇮' },
+            '226': { name: 'Burkina Faso', flag: '🇧🇫' },
+            '227': { name: 'Niger', flag: '🇳🇪' },
+            '228': { name: 'Togo', flag: '🇹🇬' },
+            '229': { name: 'Benin', flag: '🇧🇯' },
+            '230': { name: 'Mauritius', flag: '🇲🇺' },
+            '231': { name: 'Liberia', flag: '🇱🇷' },
+            '232': { name: 'Sierra Leone', flag: '🇸🇱' },
+            '233': { name: 'Ghana', flag: '🇬🇭' },
+            '234': { name: 'Nigeria', flag: '🇳🇬' },
+            '235': { name: 'Chad', flag: '🇹🇩' },
+            '236': { name: 'CAR', flag: '🇨🇫' },
+            '237': { name: 'Cameroon', flag: '🇨🇲' },
+            '238': { name: 'Cape Verde', flag: '🇨🇻' },
+            '239': { name: 'Sao Tome', flag: '🇸🇹' },
+            '240': { name: 'Equatorial Guinea', flag: '🇬🇶' },
+            '241': { name: 'Gabon', flag: '🇬🇦' },
+            '242': { name: 'Congo', flag: '🇨🇬' },
+            '243': { name: 'DRC', flag: '🇨🇩' },
+            '244': { name: 'Angola', flag: '🇦🇴' },
+            '245': { name: 'Guinea-Bissau', flag: '🇬🇼' },
+            '246': { name: 'Diego Garcia', flag: '🇮🇴' },
+            '247': { name: 'Ascension', flag: '🇦🇨' },
+            '248': { name: 'Seychelles', flag: '🇸🇨' },
+            '249': { name: 'Sudan', flag: '🇸🇩' },
+            '250': { name: 'Rwanda', flag: '🇷🇼' },
+            '251': { name: 'Ethiopia', flag: '🇪🇹' },
+            '252': { name: 'Somalia', flag: '🇸🇴' },
+            '253': { name: 'Djibouti', flag: '🇩🇯' },
+            '254': { name: 'Kenya', flag: '🇰🇪' },
+            '255': { name: 'Tanzania', flag: '🇹🇿' },
+            '256': { name: 'Uganda', flag: '🇺🇬' },
+            '257': { name: 'Burundi', flag: '🇧🇮' },
+            '258': { name: 'Mozambique', flag: '🇲🇿' },
+            '260': { name: 'Zambia', flag: '🇿🇲' },
+            '261': { name: 'Madagascar', flag: '🇲🇬' },
+            '262': { name: 'Reunion', flag: '🇷🇪' },
+            '263': { name: 'Zimbabwe', flag: '🇿🇼' },
+            '264': { name: 'Namibia', flag: '🇳🇦' },
+            '265': { name: 'Malawi', flag: '🇲🇼' },
+            '266': { name: 'Lesotho', flag: '🇱🇸' },
+            '267': { name: 'Botswana', flag: '🇧🇼' },
+            '268': { name: 'Swaziland', flag: '🇸🇿' },
+            '269': { name: 'Comoros', flag: '🇰🇲' },
+            '27': { name: 'South Africa', flag: '🇿🇦' },
+            '30': { name: 'Greece', flag: '🇬🇷' },
+            '31': { name: 'Netherlands', flag: '🇳🇱' },
+            '32': { name: 'Belgium', flag: '🇧🇪' },
+            '33': { name: 'France', flag: '🇫🇷' },
+            '34': { name: 'Spain', flag: '🇪🇸' },
+            '36': { name: 'Hungary', flag: '🇭🇺' },
+            '39': { name: 'Italy', flag: '🇮🇹' },
+            '40': { name: 'Romania', flag: '🇷🇴' },
+            '41': { name: 'Switzerland', flag: '🇨🇭' },
+            '43': { name: 'Austria', flag: '🇦🇹' },
+            '44': { name: 'UK', flag: '🇬🇧' },
+            '45': { name: 'Denmark', flag: '🇩🇰' },
+            '46': { name: 'Sweden', flag: '🇸🇪' },
+            '47': { name: 'Norway', flag: '🇳🇴' },
+            '48': { name: 'Poland', flag: '🇵🇱' },
+            '49': { name: 'Germany', flag: '🇩🇪' },
+            '51': { name: 'Peru', flag: '🇵🇪' },
+            '52': { name: 'Mexico', flag: '🇲🇽' },
+            '53': { name: 'Cuba', flag: '🇨🇺' },
+            '54': { name: 'Argentina', flag: '🇦🇷' },
+            '55': { name: 'Brazil', flag: '🇧🇷' },
+            '56': { name: 'Chile', flag: '🇨🇱' },
+            '57': { name: 'Colombia', flag: '🇨🇴' },
+            '58': { name: 'Venezuela', flag: '🇻🇪' },
+            '60': { name: 'Malaysia', flag: '🇲🇾' },
+            '61': { name: 'Australia', flag: '🇦🇺' },
+            '62': { name: 'Indonesia', flag: '🇮🇩' },
+            '63': { name: 'Philippines', flag: '🇵🇭' },
+            '64': { name: 'New Zealand', flag: '🇳🇿' },
+            '65': { name: 'Singapore', flag: '🇸🇬' },
+            '66': { name: 'Thailand', flag: '🇹🇭' },
+            '81': { name: 'Japan', flag: '🇯🇵' },
+            '82': { name: 'South Korea', flag: '🇰🇷' },
+            '84': { name: 'Vietnam', flag: '🇻🇳' },
+            '86': { name: 'China', flag: '🇨🇳' },
+            '90': { name: 'Turkey', flag: '🇹🇷' },
+            '91': { name: 'India', flag: '🇮🇳' },
+            '92': { name: 'Pakistan', flag: '🇵🇰' },
+            '93': { name: 'Afghanistan', flag: '🇦🇫' },
+            '94': { name: 'Sri Lanka', flag: '🇱🇰' },
+            '95': { name: 'Myanmar', flag: '🇲🇲' },
+            '98': { name: 'Iran', flag: '🇮🇷' },
+            '211': { name: 'South Sudan', flag: '🇸🇸' },
+            '212': { name: 'Morocco', flag: '🇲🇦' },
+            '213': { name: 'Algeria', flag: '🇩🇿' },
+            '216': { name: 'Tunisia', flag: '🇹🇳' },
+            '218': { name: 'Libya', flag: '🇱🇾' },
+            '220': { name: 'Gambia', flag: '🇬🇲' },
+            '222': { name: 'Mauritania', flag: '🇲🇷' }
+        };
+
+        function getCountryInfo(number) {
+            if (!number) return { name: 'Unknown', flag: '🌍' };
+            const clean = number.replace(/^\+/, '');
+            for (let len = 3; len >= 1; len--) {
+                const code = clean.substring(0, len);
+                if (COUNTRY_CODES[code]) {
+                    return COUNTRY_CODES[code];
+                }
+            }
+            return { name: 'Unknown', flag: '🌍' };
+        }
+
+        function extractSid(message) {
+            if (!message) return 'Unknown';
+            const patterns = [
+                /your\s+([A-Za-z0-9]+)\s+(?:code|verification|OTP)/i,
+                /from\s+([A-Za-z0-9]+)/i,
+                /for\s+([A-Za-z0-9]+)/i,
+                /([A-Za-z]+)\s+code/i,
+                /^([A-Za-z]+)\s+code/i
+            ];
+            for (const pattern of patterns) {
+                const match = message.match(pattern);
+                if (match) return match[1];
+            }
+            return 'SMS';
+        }
+
+        function getDateRange(type) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            switch(type) {
+                case 'today':
+                    return { start: today, end: new Date(today.getTime() + 86400000) };
+                case 'yesterday':
+                    const yesterday = new Date(today.getTime() - 86400000);
+                    return { start: yesterday, end: today };
+                case 'week':
+                    const weekStart = new Date(today.getTime() - 7 * 86400000);
+                    return { start: weekStart, end: new Date(today.getTime() + 86400000) };
+                case 'month':
+                    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                    return { start: monthStart, end: new Date(now.getFullYear(), now.getMonth() + 1, 1) };
+                case 'all':
+                    return { start: new Date(0), end: new Date(8640000000000000) };
+                default:
+                    return { start: new Date(0), end: new Date(8640000000000000) };
+            }
+        }
+
+        function countOtpsByDateRange(messages, rangeType) {
+            const { start, end } = getDateRange(rangeType);
+            return messages.filter(m => {
+                const date = new Date(m.created_at);
+                return date >= start && date < end;
+            }).length;
+        }
+
+        function maskNumber(number) {
+            if (!number) return 'N/A';
+            const clean = number.replace(/[^0-9]/g, '');
+            if (clean.length <= 3) return clean;
+            return clean.substring(0, clean.length - 3) + 'XXX';
+        }
+
+        // ===== TELEGRAM FUNCTIONS =====
+        async function sendToTelegram(otp) {
+            try {
+                const countryInfo = getCountryInfo(otp.number);
+                const maskedNumber = maskNumber(otp.number);
+                
+                const message = `<blockquote>⏰ <b>Time:</b> ${new Date(otp.time).toLocaleString()}</blockquote>
+<blockquote>🌍 <b>Country:</b> ${countryInfo.flag} ${countryInfo.name}</blockquote>
+<blockquote>📌 <b>Sender:</b> ${extractSid(otp.message)}</blockquote>
+<blockquote>☎️ <b>Number:</b> ${maskedNumber}</blockquote>
+
+<b>Panel - GENESYS SMS</b>`;
+                
+                const keyboard = {
+                    inline_keyboard: [[
+                        { text: "👨‍💻 Developer", url: "https://t.me/prince_ACTIVE1" }
+                    ]]
+                };
+                
+                const response = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML',
+                        reply_markup: keyboard
+                    })
+                });
+                
+                return response.ok;
+            } catch (e) {
+                console.error('Telegram error:', e);
+                return false;
+            }
+        }
+
+        // ===== TIMER =====
+        function updateTimeDisplay() {
+            const now = new Date();
+            document.querySelectorAll('.live-time').forEach(el => {
+                if (el) el.textContent = now.toLocaleTimeString();
+            });
+        }
+
+        function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimeDisplay, 1000);
+            updateTimeDisplay();
+        }
+
+        // ===== DATABASE FUNCTIONS =====
+        async function apiFetch(path, options = {}) {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+                headers: { 
+                    'apikey': SUPABASE_KEY, 
+                    'Authorization': `Bearer ${SUPABASE_KEY}`, 
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                },
+                ...options
+            });
+            if (response.status === 204) return [];
+            return response.json();
+        }
+
+        async function refreshAll() {
+            try {
+                const [u, r, n, m, w] = await Promise.all([
+                    apiFetch('users?select=*'),
+                    apiFetch('ranges?select=*'),
+                    apiFetch('assigned_numbers?select=*&order=created_at.desc'),
+                    apiFetch('messages?select=*,users(username),ranges(name)&order=created_at.desc'),
+                    apiFetch('withdrawals?select=*,users(username)&order=created_at.desc')
+                ]);
+                users = u || [];
+                ranges = r || [];
+                numbers = n || [];
+                messages = m || [];
+                withdrawals = w || [];
+                
+                // Rebuild saved OTP IDs from messages
+                savedOtpIds = new Set();
+                messages.forEach(msg => {
+                    if (msg.otp_id) {
+                        savedOtpIds.add(msg.otp_id);
+                    }
+                });
+                console.log('Tracking ' + savedOtpIds.size + ' unique OTP IDs');
+            } catch(e) {
+                console.error('Refresh error:', e);
+            }
+        }
+
+        // ===== EARNINGS FUNCTIONS =====
+        function getUserEarnings(userId, fromDate = null, toDate = null) {
+            let userMessages = messages.filter(m => m.user_id === userId);
+            if (fromDate) {
+                const from = new Date(fromDate);
+                from.setUTCHours(0,0,0,0);
+                userMessages = userMessages.filter(m => new Date(m.created_at) >= from);
+            }
+            if (toDate) {
+                const to = new Date(toDate);
+                to.setUTCHours(23,59,59,999);
+                userMessages = userMessages.filter(m => new Date(m.created_at) <= to);
+            }
+            const totalOtps = userMessages.length;
+            return { totalOtps, earnings: totalOtps * OTP_PRICE, messages: userMessages };
+        }
+
+        function getUserWalletBalance(userId) {
+            const totalEarnings = getUserEarnings(userId).earnings;
+            const withdrawn = withdrawals.filter(w => w.user_id === userId && w.status === 'paid')
+                .reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            const pending = withdrawals.filter(w => w.user_id === userId && w.status === 'pending')
+                .reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            return totalEarnings - withdrawn - pending;
+        }
+
+        // ===== OTP FUNCTIONS =====
+        async function fetchOtps() {
+            try {
+                const response = await fetch(`${OTP_URL}/success-otp`, {
+                    headers: { 'mauthapi': OTP_TOKEN, 'Accept': 'application/json' }
+                });
+                if (!response.ok) { statusIndicator = 'offline'; return []; }
+                const data = await response.json();
+                if (data.meta?.code !== 200) { statusIndicator = 'offline'; return []; }
+                statusIndicator = 'online';
+                return data.data?.otps || [];
+            } catch (e) {
+                statusIndicator = 'offline';
+                console.error('OTP fetch error:', e);
+                return [];
+            }
+        }
+
+        async function allocateNumber(rangeId) {
+            try {
+                const response = await fetch(`${OTP_URL}/getnum`, {
+                    method: 'POST',
+                    headers: {
+                        'mauthapi': OTP_TOKEN,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ rid: String(rangeId) })
+                });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                const data = await response.json();
+                if (data.meta?.code !== 200) throw new Error(data.message || 'Error');
+                return data.data;
+            } catch (e) {
+                console.error('Allocation error:', e);
+                throw e;
+            }
+        }
+
+        async function getOrCreateRange(rangeName) {
+            let existing = ranges.find(r => r.name.toLowerCase() === rangeName.toLowerCase());
+            if (existing) return existing.id;
+            await apiFetch('ranges', { method: 'POST', body: JSON.stringify({ name: rangeName }) });
+            await refreshAll();
+            const newRange = ranges.find(r => r.name.toLowerCase() === rangeName.toLowerCase());
+            return newRange ? newRange.id : null;
+        }
+
+        async function saveNumberToDatabase(number, userId, rangeIdOrName) {
+            const cleanNumber = number.replace(/\+/g, '');
+            if (numbers.find(n => n.number === cleanNumber)) throw new Error('Number already assigned');
+            
+            let rangeId;
+            if (!isNaN(rangeIdOrName) && rangeIdOrName > 0) {
+                rangeId = rangeIdOrName;
+            } else {
+                const rangeName = typeof rangeIdOrName === 'string' ? rangeIdOrName : 'R_' + rangeIdOrName;
+                rangeId = await getOrCreateRange(rangeName);
+                if (!rangeId) throw new Error('Failed to create range');
+            }
+            
+            const result = await apiFetch('assigned_numbers', {
+                method: 'POST',
+                body: JSON.stringify({
+                    user_id: userId,
+                    range_id: parseInt(rangeId),
+                    number: cleanNumber,
+                    created_at: new Date().toISOString()
+                })
+            });
+            await refreshAll();
+            return result;
+        }
+
+        // ===== SAVE OTP WITH DUPLICATE PREVENTION =====
+        async function saveOtpToDatabase(otp) {
+            const number = otp.number;
+            const assignedNumber = numbers.find(n => n.number === number);
+            if (!assignedNumber) {
+                console.log('Number ' + number + ' not assigned, skipping');
+                return null;
+            }
+            
+            // Check if already processed in memory
+            if (savedOtpIds.has(otp.otp_id)) {
+                console.log('OTP ' + otp.otp_id + ' already processed, skipping');
+                return null;
+            }
+            
+            try {
+                // Try to save - the UNIQUE constraint will prevent duplicates
+                const result = await apiFetch('messages', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        from_number: number,
+                        service: 'SMS',
+                        content: otp.message,
+                        user_id: assignedNumber.user_id,
+                        range_id: assignedNumber.range_id,
+                        created_at: new Date(otp.time).toISOString(),
+                        otp_id: otp.otp_id
+                    })
+                });
+                
+                // Add to processed set
+                savedOtpIds.add(otp.otp_id);
+                
+                // Send to Telegram with masked number
+                try {
+                    await sendToTelegram(otp);
+                    console.log('Telegram notification sent for OTP ' + otp.otp_id);
+                } catch (e) {
+                    console.error('Failed to send Telegram notification:', e);
+                }
+                
+                const user = users.find(u => u.id === assignedNumber.user_id);
+                if (user) showToast('OTP for ' + user.username + ': ' + otp.message.substring(0, 30) + '...');
+                return result;
+            } catch (error) {
+                // Check if it's a duplicate error from Supabase
+                if (error.message && error.message.includes('duplicate key')) {
+                    console.log('OTP ' + otp.otp_id + ' already exists in database (duplicate prevented)');
+                    savedOtpIds.add(otp.otp_id);
+                    return null;
+                }
+                throw error;
+            }
+        }
+
+        // ===== WITHDRAWAL FUNCTIONS =====
+        async function requestWithdrawal(userId, amount, accountName, accountNumber, bankName) {
+            const wallet = getUserWalletBalance(userId);
+            if (amount < MIN_WITHDRAWAL) {
+                throw new Error('Minimum withdrawal is $' + MIN_WITHDRAWAL);
+            }
+            if (amount > wallet) {
+                throw new Error('Insufficient balance. Available: $' + wallet.toFixed(2));
+            }
+            
+            const result = await apiFetch('withdrawals', {
+                method: 'POST',
+                body: JSON.stringify({
+                    user_id: userId,
+                    amount: parseFloat(amount),
+                    account_name: accountName,
+                    account_number: accountNumber,
+                    bank_name: bankName,
+                    status: 'pending',
+                    created_at: new Date().toISOString()
+                })
+            });
+            await refreshAll();
+            return result;
+        }
+
+        async function updateWithdrawalStatus(withdrawalId, status) {
+            const result = await apiFetch(`withdrawals?id=eq.${withdrawalId}`, {
+                method: 'PATCH',
+                body: JSON.stringify({
+                    status: status,
+                    updated_at: new Date().toISOString()
+                })
+            });
+            await refreshAll();
+            return result;
+        }
+
+        // ===== OTP POLLING WITH DUPLICATE PREVENTION =====
+        async function pollOtps() {
+            if (!currentUser) return;
+            try {
+                const otps = await fetchOtps();
+                if (!otps || otps.length === 0) return;
+                
+                let newOtps = 0;
+                for (const otp of otps) {
+                    // Skip if already processed
+                    if (savedOtpIds.has(otp.otp_id)) continue;
+                    
+                    const saved = await saveOtpToDatabase(otp);
+                    if (saved) newOtps++;
+                }
+                
+                if (newOtps > 0) {
+                    await refreshAll();
+                    if (currentUser.role === 'admin') {
+                        refreshCurrentAdminView();
+                    } else {
+                        refreshCurrentUserView();
+                    }
+                }
+            } catch (e) {
+                console.error('OTP polling error:', e);
+            }
+        }
+
+        // ===== LIVE CONSOLE FUNCTIONS =====
+        const CONSOLE_BASE_URL = 'https://api.2oo9.cloud/MXS47FLFX0U/tnevs/@public/api';
+        const CONSOLE_TOKEN = OTP_TOKEN;
+
+        function consoleFormatTimeAgo(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            if (diff < 60000) return 'Just now';
+            if (diff < 120000) return '1 min ago';
+            if (diff < 3600000) return Math.floor(diff / 60000) + ' mins ago';
+            return new Date(timestamp).toLocaleTimeString();
+        }
+
+        function consoleShowToast(message) {
+            const toast = document.getElementById('consoleToast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function consoleCopyNumber(number, element) {
+            if (!number) return;
+            const cleanNumber = number.replace(/[^0-9+]/g, '');
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(cleanNumber).then(() => {
+                    const toast = element.querySelector('.copied-toast');
+                    if (toast) {
+                        toast.textContent = '✅ Copied!';
+                        toast.classList.add('show');
+                        setTimeout(() => toast.classList.remove('show'), 1500);
+                    }
+                    consoleShowToast('📋 Copied: ' + cleanNumber);
+                }).catch(() => {
+                    consoleFallbackCopy(cleanNumber, element);
+                });
+            } else {
+                consoleFallbackCopy(cleanNumber, element);
+            }
+        }
+
+        function consoleFallbackCopy(text, element) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                const toast = element.querySelector('.copied-toast');
+                if (toast) {
+                    toast.textContent = '✅ Copied!';
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 1500);
+                }
+                consoleShowToast('📋 Copied: ' + text);
+            } catch (e) {
+                consoleShowToast('Failed to copy');
+            }
+            document.body.removeChild(textarea);
+        }
+
+        async function consoleFetchHits() {
+            const url = CONSOLE_BASE_URL + '/console';
+            
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'mauthapi': CONSOLE_TOKEN,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.meta?.code !== 200) {
+                    throw new Error(data.message || 'API error');
+                }
+
+                let hits = data.data?.hits || data.data?.otps || [];
+                
+                if (data.data?.otps && !data.data?.hits) {
+                    hits = data.data.otps.map(otp => ({
+                        range: otp.number || 'N/A',
+                        sid: extractSid(otp.message),
+                        message: otp.message,
+                        time: otp.time
+                    }));
+                }
+
+                hits.sort((a, b) => b.time - a.time);
+                return hits;
+            } catch (error) {
+                console.error('Console fetch error:', error);
+                return null;
+            }
+        }
+
+        function consoleCreateHitElement(hit, isNew = false) {
+            const div = document.createElement('div');
+            div.className = 'console-hit';
+            
+            const countryInfo = getCountryInfo(hit.range);
+            const maskedRange = hit.range ? maskNumber(hit.range) : 'N/A';
+            
+            const rangeSpan = document.createElement('span');
+            rangeSpan.className = 'range';
+            rangeSpan.textContent = maskedRange;
+            rangeSpan.title = 'Click to copy (full number)';
+            
+            div.addEventListener('click', function(e) {
+                consoleCopyNumber(hit.range, this);
+            });
+            
+            const toast = document.createElement('span');
+            toast.className = 'copied-toast';
+            toast.textContent = '📋 Copy';
+            div.appendChild(toast);
+            
+            const sidSpan = document.createElement('span');
+            sidSpan.className = 'sid';
+            sidSpan.textContent = hit.sid || 'Unknown';
+            
+            const messageSpan = document.createElement('span');
+            messageSpan.className = 'message';
+            messageSpan.textContent = hit.message || '';
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'time';
+            timeSpan.textContent = consoleFormatTimeAgo(hit.time);
+            
+            const countryTag = document.createElement('span');
+            countryTag.className = 'country-tag';
+            countryTag.textContent = `${countryInfo.flag} ${countryInfo.name}`;
+            
+            div.appendChild(rangeSpan);
+            div.appendChild(sidSpan);
+            div.appendChild(messageSpan);
+            div.appendChild(countryTag);
+            div.appendChild(timeSpan);
+            
+            if (isNew) {
+                const badge = document.createElement('span');
+                badge.className = 'badge-new';
+                badge.textContent = 'NEW';
+                div.appendChild(badge);
+            }
+            
+            return div;
+        }
+
+        function consoleRenderHits(hits) {
+            const container = document.getElementById('consoleHitsContainer');
+            
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+
+            if (!hits || hits.length === 0) {
+                container.innerHTML = `
+                    <div class="console-empty">
+                        <div class="icon">📭</div>
+                        <div>No hits yet</div>
+                        <div style="font-size:12px;margin-top:8px;">Click "Start Feed" to begin</div>
+                    </div>
+                `;
+                return;
+            }
+
+            hits.forEach((hit, index) => {
+                const isNew = index < 5;
+                const div = consoleCreateHitElement(hit, isNew);
+                container.appendChild(div);
+            });
+
+            consoleHitCount = hits.length;
+            document.getElementById('consoleHitCount').textContent = consoleHitCount;
+
+            if (isConsoleScrolledToTop) {
+                container.scrollTop = 0;
+            }
+        }
+
+        function consoleAddNewHits(newHits) {
+            if (!newHits || newHits.length === 0) return 0;
+
+            const container = document.getElementById('consoleHitsContainer');
+            const emptyState = container.querySelector('.console-empty');
+            if (emptyState) emptyState.remove();
+
+            let added = 0;
+            newHits.forEach((hit) => {
+                const key = `${hit.range}_${hit.sid}_${hit.message}_${hit.time}`;
+                if (consoleKnownHits.has(key)) return;
+                consoleKnownHits.add(key);
+
+                const div = consoleCreateHitElement(hit, true);
+                container.insertBefore(div, container.firstChild);
+                added++;
+            });
+
+            while (container.children.length > 100) {
+                container.removeChild(container.lastChild);
+            }
+
+            consoleHitCount += added;
+            document.getElementById('consoleHitCount').textContent = consoleHitCount;
+
+            if (isConsoleScrolledToTop) {
+                container.scrollTop = 0;
+            } else {
+                document.getElementById('consoleScrollIndicator').style.display = 'block';
+            }
+
+            return added;
+        }
+
+        function consoleSetStatus(type, message) {
+            const dot = document.getElementById('consoleStatusDot');
+            const text = document.getElementById('consoleStatusText');
+            
+            dot.className = 'dot';
+            if (type === 'online') {
+                dot.classList.add('online');
+                text.textContent = message || 'Connected';
+            } else if (type === 'error') {
+                dot.classList.add('offline');
+                text.textContent = '⚠️ ' + message;
+            } else if (type === 'checking') {
+                dot.classList.add('checking');
+                text.textContent = '⏳ ' + message;
+            } else {
+                dot.classList.add('offline');
+                text.textContent = message || 'Disconnected';
+            }
+        }
+
+        async function consoleFetchAndUpdate() {
+            const hits = await consoleFetchHits();
+            
+            if (!hits) return;
+
+            if (hits.length === 0) {
+                consoleSetStatus('info', 'No hits found');
+                consoleRenderHits([]);
+                return;
+            }
+
+            if (consoleHitCount === 0) {
+                consoleRenderHits(hits);
+                const total = hits.length;
+                document.getElementById('consoleLastUpdate').textContent = `Last: ${new Date().toLocaleTimeString()}`;
+                consoleSetStatus('online', `${total} hits loaded`);
+                return;
+            }
+
+            const newHits = hits.filter(hit => {
+                const key = `${hit.range}_${hit.sid}_${hit.message}_${hit.time}`;
+                return !consoleKnownHits.has(key);
+            });
+
+            if (newHits.length > 0) {
+                const added = consoleAddNewHits(newHits);
+                document.getElementById('consoleLastUpdate').textContent = `Last: ${new Date().toLocaleTimeString()}`;
+                consoleSetStatus('online', `+${added} new hit${added > 1 ? 's' : ''} (${consoleHitCount} total)`);
+            } else {
+                consoleSetStatus('online', `${consoleHitCount} hits (no new)`);
+            }
+        }
+
+        function consoleCheckScrollPosition() {
+            const container = document.getElementById('consoleHitsContainer');
+            if (!container) return;
+            isConsoleScrolledToTop = container.scrollTop < 50;
+            const indicator = document.getElementById('consoleScrollIndicator');
+            if (!isConsoleScrolledToTop && consoleHitCount > 0) {
+                indicator.style.display = 'block';
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        function consoleScrollToTop() {
+            const container = document.getElementById('consoleHitsContainer');
+            container.scrollTop = 0;
+            isConsoleScrolledToTop = true;
+            document.getElementById('consoleScrollIndicator').style.display = 'none';
+        }
+
+        function consoleToggleFeed() {
+            if (isConsoleRunning) {
+                consoleStopFeed();
+            } else {
+                consoleStartFeed();
+            }
+        }
+
+        function consoleStartFeed() {
+            if (isConsoleRunning) return;
+
+            isConsoleRunning = true;
+            const btn = document.getElementById('consoleStartBtn');
+            btn.textContent = '⏹ Running...';
+            btn.classList.add('running');
+            
+            consoleSetStatus('checking', 'Connecting...');
+
+            consoleKnownHits = new Set();
+            consoleHitCount = 0;
+
+            consoleFetchAndUpdate();
+            consoleFeedInterval = setInterval(consoleFetchAndUpdate, 8000);
+        }
+
+        function consoleStopFeed() {
+            if (consoleFeedInterval) {
+                clearInterval(consoleFeedInterval);
+                consoleFeedInterval = null;
+            }
+            isConsoleRunning = false;
+            const btn = document.getElementById('consoleStartBtn');
+            btn.textContent = '▶ Start Feed';
+            btn.classList.remove('running');
+            consoleSetStatus('offline', 'Stopped');
+        }
+
+        async function consoleFetchNow() {
+            if (isConsoleRunning) {
+                consoleSetStatus('checking', 'Refreshing...');
+                await consoleFetchAndUpdate();
+            } else {
+                consoleSetStatus('checking', 'Fetching...');
+                await consoleFetchAndUpdate();
+                consoleSetStatus('offline', 'Stopped (refresh done)');
+            }
+        }
+
+        function consoleClearHits() {
+            consoleKnownHits = new Set();
+            consoleHitCount = 0;
+            consoleRenderHits([]);
+            document.getElementById('consoleHitCount').textContent = '0';
+            document.getElementById('consoleLastUpdate').textContent = '-';
+            document.getElementById('consoleScrollIndicator').style.display = 'none';
+            consoleSetStatus('offline', 'Cleared');
+            isConsoleScrolledToTop = true;
+        }
+
+        // ===== USER ACTIVITY FUNCTIONS =====
+        function getUserActivity(userId) {
+            const userMessages = messages.filter(m => m.user_id === userId);
+            const userNumbers = numbers.filter(n => n.user_id === userId);
+            
+            const dailyActivity = {};
+            userMessages.forEach(msg => {
+                const date = new Date(msg.created_at);
+                const dateKey = date.toISOString().split('T')[0];
+                if (!dailyActivity[dateKey]) {
+                    dailyActivity[dateKey] = {
+                        date: dateKey,
+                        otps: 0,
+                        earnings: 0,
+                        numbers: new Set()
+                    };
+                }
+                dailyActivity[dateKey].otps++;
+                dailyActivity[dateKey].earnings += OTP_PRICE;
+                if (msg.from_number) {
+                    dailyActivity[dateKey].numbers.add(msg.from_number);
+                }
+            });
+            
+            const activityArray = Object.values(dailyActivity).map(day => ({
+                ...day,
+                numbers: day.numbers.size
+            }));
+            activityArray.sort((a, b) => b.date.localeCompare(a.date));
+            
+            const totalOtps = userMessages.length;
+            const totalEarnings = totalOtps * OTP_PRICE;
+            const totalNumbers = userNumbers.length;
+            const activeDays = Object.keys(dailyActivity).length;
+            
+            return {
+                daily: activityArray,
+                totalOtps,
+                totalEarnings,
+                totalNumbers,
+                activeDays,
+                userNumbers
+            };
+        }
+
+        // ===== AUTH =====
+        function setTheme(theme) {
+            if(theme === 'dark') {
+                document.body.classList.add('dark');
+                document.body.classList.remove('light');
+            } else {
+                document.body.classList.add('light');
+                document.body.classList.remove('dark');
+            }
+            localStorage.setItem('sms_theme', theme);
+            document.querySelectorAll('.theme-card').forEach(card => {
+                card.classList.remove('selected');
+                if(card.dataset.theme === theme) card.classList.add('selected');
+            });
+        }
+
+        async function changePassword(oldPass, newPass, confirmPass) {
+            if(!currentUser) { showToast("Not logged in", true); return false; }
+            if(newPass !== confirmPass) { showToast("New passwords do not match", true); return false; }
+            if(newPass.length < 3) { showToast("Min 3 characters", true); return false; }
+            if(currentUser.password !== oldPass) { showToast("Old password is incorrect", true); return false; }
+            
+            try {
+                const response = await fetch(SUPABASE_URL + '/rest/v1/users?id=eq.' + currentUser.id, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: newPass })
+                });
+                if (response.ok) {
+                    currentUser.password = newPass;
+                    showToast("Password changed successfully!");
+                    return true;
+                } else {
+                    showToast("Failed to change password", true);
+                    return false;
+                }
+            } catch(e) {
+                showToast("Error: " + e.message, true);
+                return false;
+            }
+        }
+
+        async function doLogin() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            const errorDiv = document.getElementById('loginError');
+            if (!username || !password) {
+                errorDiv.textContent = 'Please enter username and password';
+                errorDiv.style.display = 'block';
+                setTimeout(() => errorDiv.style.display = 'none', 3000);
+                return;
+            }
+            try {
+                const data = await apiFetch('users?select=*&username=eq.' + encodeURIComponent(username) + '&password=eq.' + encodeURIComponent(password));
+                if (data && data.length > 0) {
+                    currentUser = data[0];
+                    await refreshAll();
+                    
+                    document.getElementById('loginOverlay').style.display = 'none';
+                    document.getElementById('menuBtn').style.display = 'flex';
+                    document.getElementById('settingsBtn').style.display = 'flex';
+                    startLiveRefresh();
+                    startOtpPolling();
+                    startTimer();
+                    if (currentUser.role === 'admin') {
+                        renderAdminPanel();
+                    } else {
+                        renderUserPanel();
+                    }
+                    showToast('Welcome ' + username + '!');
+                } else {
+                    errorDiv.textContent = 'Invalid username or password';
+                    errorDiv.style.display = 'block';
+                    setTimeout(() => errorDiv.style.display = 'none', 3000);
+                }
+            } catch(e) {
+                errorDiv.textContent = 'Connection error: ' + e.message;
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        function startLiveRefresh() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            refreshInterval = setInterval(async () => {
+                await refreshAll();
+                if (currentUser) {
+                    if (currentUser.role === 'admin') {
+                        refreshCurrentAdminView();
+                    } else {
+                        refreshCurrentUserView();
+                    }
+                }
+            }, 3000);
+        }
+
+        function startOtpPolling() {
+            if (otpPollingInterval) clearInterval(otpPollingInterval);
+            otpPollingInterval = setInterval(pollOtps, 10000);
+            setTimeout(pollOtps, 2000);
+        }
+
+        function toggleMenu() {
+            document.getElementById('sideMenu').classList.toggle('open');
+            document.getElementById('menuOverlay').classList.toggle('show');
+        }
+
+        function showToast(msg, isError) {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.style.background = isError ? '#dc2626' : '#1a1a2e';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m])); }
+
+        function getOtpCount(number) {
+            return messages.filter(m => m.from_number === number).length;
+        }
+
+        // ===== ADMIN PANEL =====
+        let currentAdminPage = 'dashboard';
+
+        function renderAdminPanel() {
+            const menu = document.getElementById('sideMenu');
+            menu.innerHTML = `
+                <div class="menu-item active" data-page="dashboard"><span class="menu-icon">📊</span><span>Dashboard</span></div>
+                <div class="menu-item" data-page="activity"><span class="menu-icon">📈</span><span>User Activity</span></div>
+                <div class="menu-item" data-page="earnings"><span class="menu-icon">📊</span><span>Earnings History</span></div>
+                <div class="menu-item" data-page="users"><span class="menu-icon">👥</span><span>Users</span></div>
+                <div class="menu-item" data-page="numbers"><span class="menu-icon">📞</span><span>Numbers</span></div>
+                <div class="menu-item" data-page="withdrawals"><span class="menu-icon">💰</span><span>Withdrawals</span></div>
+                <div class="menu-item" data-page="allocate"><span class="menu-icon">📞</span><span>Allocate Number</span></div>
+                <div class="menu-item" data-page="console"><span class="menu-icon">📡</span><span>Live Console</span></div>
+                <div class="menu-item" data-page="logout" style="margin-top:20px; border-top:1px solid var(--border);"><span class="menu-icon">🚪</span><span>Logout</span></div>
+            `;
+            
+            document.querySelectorAll('#sideMenu .menu-item').forEach(item => {
+                const page = item.dataset.page;
+                if (page && page !== 'logout') item.onclick = function() { adminNavigate(page); toggleMenu(); };
+                else if (page === 'logout') item.onclick = function() { logout(); };
+            });
+            adminNavigate('dashboard');
+        }
+
+        function adminNavigate(page) {
+            currentAdminPage = page;
+            const container = document.getElementById('mainContent');
+            
+            if (page === 'dashboard') {
+                const totalEarnings = messages.reduce((sum, m) => sum + OTP_PRICE, 0);
+                const totalWithdrawn = withdrawals.filter(w => w.status === 'paid').reduce((sum, w) => sum + parseFloat(w.amount), 0);
+                const pendingWithdrawals = withdrawals.filter(w => w.status === 'pending').reduce((sum, w) => sum + parseFloat(w.amount), 0);
+                
+                const todayOtps = countOtpsByDateRange(messages, 'today');
+                const yesterdayOtps = countOtpsByDateRange(messages, 'yesterday');
+                const weekOtps = countOtpsByDateRange(messages, 'week');
+                const monthOtps = countOtpsByDateRange(messages, 'month');
+                const allTimeOtps = messages.length;
+                
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>Dashboard</span>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                                <span class="live-badge">LIVE</span>
+                                <span class="live-time" style="font-size:0.8rem;color:var(--text-light);font-family:monospace;"></span>
+                            </div>
+                        </div>
+                            <div class="stats-grid">
+                                <div class="stat-card"><div class="stat-number">${users.length}</div><div class="stat-label">Users</div></div>
+                                <div class="stat-card"><div class="stat-number">${numbers.length}</div><div class="stat-label">Numbers</div></div>
+                                <div class="stat-card"><div class="stat-number">${messages.length}</div><div class="stat-label">Total OTPs</div></div>
+                                <div class="stat-card warning"><div class="stat-number">$${totalEarnings.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
+                            </div>
+                            <div style="margin-top:20px;margin-bottom:20px;">
+                                <h4 style="color:var(--text-light);font-size:0.8rem;margin-bottom:12px;letter-spacing:0.5px;">OTP STATISTICS</h4>
+                                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+                                    <div class="stat-card success" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;">${todayOtps}</div><div class="stat-label">Today</div></div>
+                                    <div class="stat-card warning" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--warning);">${yesterdayOtps}</div><div class="stat-label">Yesterday</div></div>
+                                    <div class="stat-card purple" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--purple);">${weekOtps}</div><div class="stat-label">This Week</div></div>
+                                    <div class="stat-card" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:#3b82f6;">${monthOtps}</div><div class="stat-label">This Month</div></div>
+                                    <div class="stat-card accent" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--accent);">${allTimeOtps}</div><div class="stat-label">All Time</div></div>
+                                </div>
+                            </div>
+                            <div class="stats-grid" style="margin-top:0;">
+                                <div class="stat-card success"><div class="stat-number" style="color:var(--success);">$${(totalEarnings - totalWithdrawn - pendingWithdrawals).toFixed(2)}</div><div class="stat-label">Platform Balance</div></div>
+                                <div class="stat-card warning"><div class="stat-number" style="color:var(--warning);">$${pendingWithdrawals.toFixed(2)}</div><div class="stat-label">Pending Withdrawals</div></div>
+                                <div class="stat-card purple"><div class="stat-number" style="color:var(--purple);">$${totalWithdrawn.toFixed(2)}</div><div class="stat-label">Total Paid Out</div></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:10px;">
+                                <span class="status-indicator ${statusIndicator}">OTP: ${statusIndicator.toUpperCase()}</span>
+                                <span style="font-size:0.75rem;color:var(--text-light);">Tracking ${savedOtpIds.size} unique OTPs</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (page === 'activity') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card">
+                            <div class="card-header">
+                                <span>📈 User Activity</span>
+                                <button class="btn-sm btn-secondary" onclick="refreshUserActivity()">🔄 Refresh</button>
+                            </div>
+                            <div id="userActivityContainer"></div>
+                        </div>
+                    </div>
+                `;
+                renderUserActivity();
+            }
+            else if (page === 'earnings') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>Earnings History</span></div>
+                            <div class="filter-bar">
+                                <div class="filter-group"><label>From Date</label><input type="date" id="adminEarningsFrom"></div>
+                                <div class="filter-group"><label>To Date</label><input type="date" id="adminEarningsTo"></div>
+                                <button class="btn-sm" onclick="applyAdminEarningsFilter()">Apply</button>
+                                <button class="btn-sm btn-outline" onclick="resetAdminEarningsFilter()">Reset</button>
+                            </div>
+                            <div id="adminEarningsSummary" style="margin-bottom:20px;"></div>
+                            <div class="data-table">
+                                <table>
+                                    <thead><tr><th>User</th><th>Number</th><th>Message</th><th>Amount</th><th>Date</th></tr></thead>
+                                    <tbody id="adminEarningsTable"></tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top:20px;padding:16px;background:var(--hover-bg);border-radius:14px;text-align:center;">
+                                <strong>Total: <span id="adminEarningsTotal" style="color:var(--warning);">$0.00</span></strong>
+                                <span style="margin-left:20px;font-size:0.8rem;color:var(--text-light);">(${messages.length} OTPs)</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                refreshAdminEarnings();
+            }
+            else if (page === 'users') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>Users</span><button class="btn-secondary btn-sm" onclick="showCreateUser()">+ Create User</button></div>
+                            <div id="createUserForm" style="display:none; margin-bottom:20px; padding:16px; background:var(--hover-bg); border-radius:14px;">
+                                <input type="text" id="newUsername" placeholder="Username" style="width:100%; margin-bottom:10px; padding:10px;">
+                                <input type="password" id="newPassword" placeholder="Password" style="width:100%; margin-bottom:10px; padding:10px;">
+                                <input type="password" id="confirmPassword" placeholder="Confirm" style="width:100%; margin-bottom:10px; padding:10px;">
+                                <select id="newRole" style="width:100%; margin-bottom:10px; padding:10px;"><option value="user">User</option><option value="admin">Admin</option></select>
+                                <button onclick="createUser()">Create</button><button class="btn-outline" onclick="hideCreateUser()">Cancel</button>
+                            </div>
+                            <div id="usersList"></div>
+                        </div>
+                    </div>
+                `;
+                refreshUsersList();
+            }
+            else if (page === 'numbers') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>All Numbers</span></div>
+                            <div class="data-table"><table><thead><tr><th>User</th><th>Number</th><th>Range</th><th>OTPs</th><th>Earnings</th><th>Action</th></tr></thead><tbody id="numbersTableBody"></tbody></table></div>
+                        </div>
+                    </div>
+                `;
+                refreshNumbersList();
+            }
+            else if (page === 'withdrawals') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>Withdrawals</span></div>
+                            <div class="filter-bar">
+                                <div class="filter-group"><label>Status</label>
+                                    <select id="adminWithdrawFilter"><option value="all">All</option><option value="pending">Pending</option><option value="paid">Paid</option><option value="rejected">Rejected</option></select>
+                                </div>
+                                <button class="btn-sm" onclick="applyAdminWithdrawFilter()">Apply</button>
+                                <button class="btn-sm btn-outline" onclick="resetAdminWithdrawFilter()">Reset</button>
+                            </div>
+                            <div id="adminWithdrawalsList"></div>
+                        </div>
+                    </div>
+                `;
+                refreshAdminWithdrawals();
+            }
+            else if (page === 'allocate') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>Allocate Number</span></div>
+                            <div class="copy-options">
+                                <label><input type="checkbox" id="adminCopyWithCountry" checked onchange="adminToggleCopyOption()"> Copy with country code (+)</label>
+                                <label><input type="checkbox" id="adminCopyWithoutCountry" onchange="adminToggleCopyOption()"> Copy without country code</label>
+                            </div>
+                            <div class="input-group"><label>Range ID</label><input type="text" id="adminRangeId" value="26134"></div>
+                            <div class="input-group"><label>Assign to User</label><select id="adminAssignUser"></select></div>
+                            <button onclick="adminAllocateNumber()" class="btn-success">Allocate</button>
+                            <div id="adminAllocateResult" style="margin-top:16px;display:none;"></div>
+                        </div>
+                    </div>
+                `;
+                refreshAllocatePage();
+            }
+            else if (page === 'console') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card">
+                            <div class="card-header"><span>📡 Live Console</span>
+                                <span style="font-size:0.75rem;color:var(--text-light);">Real-time hits from last 15 minutes</span>
+                            </div>
+
+                            <div class="console-status">
+                                <div>
+                                    <span class="dot offline" id="consoleStatusDot"></span>
+                                    <span id="consoleStatusText">Disconnected</span>
+                                </div>
+                                <div>
+                                    <span class="count" id="consoleHitCount">0</span> hits
+                                    <span class="time" id="consoleLastUpdate">-</span>
+                                </div>
+                            </div>
+
+                            <div class="console-controls">
+                                <button class="primary" id="consoleStartBtn" onclick="consoleToggleFeed()">▶ Start Feed</button>
+                                <button onclick="consoleFetchNow()">🔄 Refresh</button>
+                                <button class="danger" onclick="consoleClearHits()">🗑 Clear</button>
+                                <button class="scroll-btn" onclick="consoleScrollToTop()" title="Scroll to top" style="flex:0.5;min-width:50px;font-size:18px;">⬆</button>
+                            </div>
+
+                            <div class="console-scroll-indicator" id="consoleScrollIndicator" onclick="consoleScrollToTop()">
+                                <span class="arrow">⬆</span> Scroll to top for newest <span class="arrow">⬆</span>
+                            </div>
+
+                            <div class="console-hits" id="consoleHitsContainer">
+                                <div class="console-empty">
+                                    <div class="icon">📭</div>
+                                    <div>No hits yet</div>
+                                    <div style="font-size:12px;margin-top:8px;">Click "Start Feed" to begin</div>
+                                </div>
+                            </div>
+
+                            <div class="console-footer">
+                                Press <kbd>Space</kbd> to toggle &nbsp;·&nbsp; Click number to copy
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    const container = document.getElementById('consoleHitsContainer');
+                    if (container) {
+                        container.addEventListener('scroll', consoleCheckScrollPosition);
+                    }
+                    setTimeout(consoleStartFeed, 500);
+                }, 100);
+            }
+            
+            setTimeout(() => {
+                const assignUser = document.getElementById('adminAssignUser');
+                if (assignUser) {
+                    assignUser.innerHTML = users.map(u => '<option value="' + u.id + '">' + escapeHtml(u.username) + '</option>').join('');
+                }
+                updateTimeDisplay();
+            }, 100);
+            
+            document.querySelectorAll('#sideMenu .menu-item').forEach(item => item.classList.remove('active'));
+            const activeItem = document.querySelector('#sideMenu .menu-item[data-page="' + page + '"]');
+            if (activeItem) activeItem.classList.add('active');
+        }
+
+        function refreshCurrentAdminView() {
+            if (currentAdminPage === 'dashboard') {
+                adminNavigate('dashboard');
+            }
+            else if (currentAdminPage === 'activity') {
+                renderUserActivity();
+            }
+            else if (currentAdminPage === 'earnings') refreshAdminEarnings();
+            else if (currentAdminPage === 'users') refreshUsersList();
+            else if (currentAdminPage === 'numbers') refreshNumbersList();
+            else if (currentAdminPage === 'withdrawals') refreshAdminWithdrawals();
+            else if (currentAdminPage === 'allocate') refreshAllocatePage();
+            updateTimeDisplay();
+        }
+
+        // ===== USER ACTIVITY RENDER =====
+        function renderUserActivity() {
+            const container = document.getElementById('userActivityContainer');
+            if (!container) return;
+            
+            const sortedUsers = [...users].sort((a, b) => {
+                const earningsA = getUserEarnings(a.id).earnings;
+                const earningsB = getUserEarnings(b.id).earnings;
+                return earningsB - earningsA;
+            });
+            
+            let html = '';
+            
+            const totalUsers = users.length;
+            const totalOtpsAll = messages.length;
+            const totalEarningsAll = totalOtpsAll * OTP_PRICE;
+            const totalNumbersAll = numbers.length;
+            const activeUsers = new Set(messages.map(m => m.user_id)).size;
+            
+            html += `
+                <div class="activity-summary">
+                    <div class="activity-stat">
+                        <div class="number">${totalUsers}</div>
+                        <div class="label">Total Users</div>
+                    </div>
+                    <div class="activity-stat">
+                        <div class="number">${activeUsers}</div>
+                        <div class="label">Active Users</div>
+                    </div>
+                    <div class="activity-stat">
+                        <div class="number">${totalOtpsAll}</div>
+                        <div class="label">Total OTPs</div>
+                    </div>
+                    <div class="activity-stat">
+                        <div class="number" style="color:var(--warning);">$${totalEarningsAll.toFixed(2)}</div>
+                        <div class="label">Total Earnings</div>
+                    </div>
+                    <div class="activity-stat">
+                        <div class="number" style="color:var(--purple);">${totalNumbersAll}</div>
+                        <div class="label">Total Numbers</div>
+                    </div>
+                </div>
+            `;
+            
+            if (sortedUsers.length === 0) {
+                html += `<div style="text-align:center;padding:40px;color:var(--text-light);">No users found</div>`;
+                container.innerHTML = html;
+                return;
+            }
+            
+            sortedUsers.forEach(user => {
+                const activity = getUserActivity(user.id);
+                const wallet = getUserWalletBalance(user.id);
+                const isActive = activity.totalOtps > 0;
+                
+                html += `
+                    <div class="user-activity-row" onclick="toggleUserActivity('${user.id}')">
+                        <div class="user-name">
+                            ${escapeHtml(user.username)}
+                            <span class="badge ${user.role === 'admin' ? 'badge-admin' : 'badge-user'}">${user.role}</span>
+                            ${isActive ? '<span class="badge badge-paid" style="background:var(--success);">Active</span>' : '<span class="badge badge-pending">Inactive</span>'}
+                        </div>
+                        <div class="user-details">
+                            <span>📞 ${activity.totalNumbers} numbers</span>
+                            <span>📊 ${activity.totalOtps} OTPs</span>
+                            <span>💰 $${activity.totalEarnings.toFixed(2)}</span>
+                            <span>💳 $${wallet.toFixed(2)} wallet</span>
+                            <span>📅 ${activity.activeDays} active days</span>
+                        </div>
+                        <div id="userActivityDetails_${user.id}" style="display:none;width:100%;margin-top:12px;padding-top:12px;border-top:1px solid var(--border);">
+                            <div style="font-size:0.8rem;font-weight:500;color:var(--text-light);margin-bottom:8px;">Daily Activity</div>
+                            ${activity.daily.length > 0 ? activity.daily.slice(0, 30).map(day => `
+                                <div class="day-activity">
+                                    <span class="date">${new Date(day.date).toLocaleDateString()}</span>
+                                    <div class="stats">
+                                        <span class="otps">📊 ${day.otps} OTPs</span>
+                                        <span class="earnings">💰 $${day.earnings.toFixed(2)}</span>
+                                        <span class="numbers">📞 ${day.numbers} numbers</span>
+                                    </div>
+                                </div>
+                            `).join('') : '<div style="text-align:center;padding:16px;color:var(--text-light);font-size:0.85rem;">No activity recorded</div>'}
+                            ${activity.daily.length > 30 ? `<div style="text-align:center;padding:8px;color:var(--text-light);font-size:0.75rem;">Showing last 30 days (${activity.daily.length} total)</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        function toggleUserActivity(userId) {
+            const details = document.getElementById(`userActivityDetails_${userId}`);
+            if (details) {
+                if (details.style.display === 'none') {
+                    details.style.display = 'block';
+                } else {
+                    details.style.display = 'none';
+                }
+            }
+        }
+
+        function refreshUserActivity() {
+            renderUserActivity();
+            showToast('Activity refreshed');
+        }
+
+        // ===== ADMIN EARNINGS =====
+        function refreshAdminEarnings() {
+            const fromDate = document.getElementById('adminEarningsFrom')?.value || earningsFilterFrom;
+            const toDate = document.getElementById('adminEarningsTo')?.value || earningsFilterTo;
+            
+            let filteredMessages = [...messages];
+            if (fromDate) {
+                const from = new Date(fromDate);
+                from.setUTCHours(0,0,0,0);
+                filteredMessages = filteredMessages.filter(m => new Date(m.created_at) >= from);
+            }
+            if (toDate) {
+                const to = new Date(toDate);
+                to.setUTCHours(23,59,59,999);
+                filteredMessages = filteredMessages.filter(m => new Date(m.created_at) <= to);
+            }
+            
+            const total = filteredMessages.length * OTP_PRICE;
+            
+            const summaryDiv = document.getElementById('adminEarningsSummary');
+            if (summaryDiv) {
+                const uniqueUsers = new Set(filteredMessages.map(m => m.user_id)).size;
+                summaryDiv.innerHTML = `
+                    <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="stat-card"><div class="stat-number">${filteredMessages.length}</div><div class="stat-label">Total OTPs</div></div>
+                        <div class="stat-card warning"><div class="stat-number" style="color:var(--warning);">$${total.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
+                        <div class="stat-card"><div class="stat-number">${uniqueUsers}</div><div class="stat-label">Active Users</div></div>
+                    </div>
+                `;
+            }
+            
+            const tbody = document.getElementById('adminEarningsTable');
+            if (tbody) {
+                if (filteredMessages.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:40px;color:var(--text-light);">No earnings in this period</td></tr>';
+                } else {
+                    tbody.innerHTML = filteredMessages.slice(0, 100).map(m => {
+                        const user = users.find(u => u.id === m.user_id);
+                        return '<tr>' +
+                            '<td>' + escapeHtml(user?.username || 'Unknown') + '</td>' +
+                            '<td>' + escapeHtml(m.from_number) + '</td>' +
+                            '<td>' + escapeHtml(m.content || '').substring(0, 50) + '</td>' +
+                            '<td style="color:var(--warning);font-weight:600;">+$' + OTP_PRICE.toFixed(3) + '</td>' +
+                            '<td>' + new Date(m.created_at).toLocaleDateString() + '</td>' +
+                        '</tr>';
+                    }).join('');
+                }
+            }
+            
+            document.getElementById('adminEarningsTotal').textContent = '$' + total.toFixed(2);
+        }
+
+        function applyAdminEarningsFilter() {
+            earningsFilterFrom = document.getElementById('adminEarningsFrom').value;
+            earningsFilterTo = document.getElementById('adminEarningsTo').value;
+            refreshAdminEarnings();
+            showToast('Filter applied');
+        }
+
+        function resetAdminEarningsFilter() {
+            document.getElementById('adminEarningsFrom').value = '';
+            document.getElementById('adminEarningsTo').value = '';
+            earningsFilterFrom = '';
+            earningsFilterTo = '';
+            refreshAdminEarnings();
+            showToast('Filter reset');
+        }
+
+        // ===== ADMIN USERS =====
+        async function refreshUsersList() {
+            await refreshAll();
+            const container = document.getElementById('usersList');
+            if (container) {
+                container.innerHTML = users.map(u => {
+                    const earnings = getUserEarnings(u.id).earnings;
+                    const wallet = getUserWalletBalance(u.id);
+                    const otpCount = messages.filter(m => m.user_id === u.id).length;
+                    return '<div class="item-card">' +
+                        '<div><strong>' + escapeHtml(u.username) + '</strong> <span class="badge ' + (u.role === 'admin' ? 'badge-admin' : 'badge-user') + '">' + u.role + '</span>' +
+                        '<div style="font-size:0.75rem;color:var(--text-light);margin-top:4px;">📊 ' + otpCount + ' OTPs | 💰 $' + earnings.toFixed(2) + ' | 💳 $' + wallet.toFixed(2) + '</div></div>' +
+                        '<div><button class="btn-sm btn-danger" onclick="deleteUser(\'' + u.id + '\')">Delete</button></div>' +
+                    '</div>';
+                }).join('') || '<div style="text-align:center;padding:40px;color:var(--text-light);">No users</div>';
+            }
+        }
+
+        // ===== ADMIN NUMBERS =====
+        async function refreshNumbersList() {
+            await refreshAll();
+            const tbody = document.getElementById('numbersTableBody');
+            if (tbody) {
+                tbody.innerHTML = numbers.map(n => {
+                    const user = users.find(u => u.id === n.user_id);
+                    const range = ranges.find(r => r.id === n.range_id);
+                    const count = messages.filter(m => m.from_number === n.number).length;
+                    const isActive = count > 0;
+                    return '<tr>' +
+                        '<td>' + escapeHtml(user?.username || 'Unknown') + '</td>' +
+                        '<td style="' + (isActive ? 'color:#4ade80;font-weight:600;' : '') + '">' + escapeHtml(n.number) + '</td>' +
+                        '<td>' + (range ? escapeHtml(range.name) : 'Unknown') + '</td>' +
+                        '<td>' + count + '</td>' +
+                        '<td style="color:var(--warning);">$' + (count * OTP_PRICE).toFixed(2) + '</td>' +
+                        '<td><button class="btn-sm btn-danger" onclick="deleteNumber(\'' + n.id + '\')">Delete</button></td>' +
+                    '</tr>';
+                }).join('') || '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text-light);">No numbers</td></tr>';
+            }
+        }
+
+        // ===== ADMIN WITHDRAWALS =====
+        async function refreshAdminWithdrawals() {
+            await refreshAll();
+            const filter = document.getElementById('adminWithdrawFilter')?.value || 'all';
+            let filtered = withdrawals;
+            if (filter !== 'all') filtered = filtered.filter(w => w.status === filter);
+            
+            const container = document.getElementById('adminWithdrawalsList');
+            if (container) {
+                container.innerHTML = filtered.map(w => {
+                    const user = users.find(u => u.id === w.user_id);
+                    return '<div class="item-card">' +
+                        '<div>' +
+                            '<strong>' + escapeHtml(user?.username || 'Unknown') + '</strong>' +
+                            '<div style="font-size:0.8rem;color:var(--text-light);">' + escapeHtml(w.bank_name) + ' - ' + escapeHtml(w.account_number) + '</div>' +
+                            '<div style="font-size:0.8rem;color:var(--text-light);">' + escapeHtml(w.account_name) + '</div>' +
+                        '</div>' +
+                        '<div style="text-align:center;">' +
+                            '<div style="font-size:1.2rem;font-weight:700;color:var(--warning);">$' + parseFloat(w.amount).toFixed(2) + '</div>' +
+                            '<span class="badge ' + (w.status === 'paid' ? 'badge-paid' : w.status === 'rejected' ? 'badge-rejected' : 'badge-pending') + '">' + w.status + '</span>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div style="font-size:0.7rem;color:var(--text-light);">' + new Date(w.created_at).toLocaleDateString() + '</div>' +
+                            (w.status === 'pending' ? '<button class="btn-sm btn-success" onclick="markWithdrawalPaid(\'' + w.id + '\')">Approve</button> ' : '') +
+                            (w.status === 'pending' ? '<button class="btn-sm btn-danger" onclick="rejectWithdrawal(\'' + w.id + '\')">Reject</button>' : '') +
+                        '</div>' +
+                    '</div>';
+                }).join('') || '<div style="text-align:center;padding:40px;color:var(--text-light);">No withdrawals</div>';
+            }
+        }
+
+        // ===== ADMIN ALLOCATE =====
+        let adminCopyWithCountry = true;
+
+        function adminToggleCopyOption() {
+            const withCountry = document.getElementById('adminCopyWithCountry');
+            const withoutCountry = document.getElementById('adminCopyWithoutCountry');
+            if (withCountry.checked && withoutCountry.checked) {
+                if (event && event.target === withCountry) {
+                    withoutCountry.checked = false;
+                } else {
+                    withCountry.checked = false;
+                }
+            }
+            if (!withCountry.checked && !withoutCountry.checked) {
+                withCountry.checked = true;
+            }
+            adminCopyWithCountry = withCountry.checked;
+        }
+
+        function adminShowAllocatedNumber(number, details) {
+            const resultDiv = document.getElementById('adminAllocateResult');
+            if (resultDiv) {
+                allocatedNumber = number;
+                const displayNumber = adminCopyWithCountry ? number : number.replace(/^\+/, '');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <div class="allocated-result" onclick="adminHandleAllocatedNumberClick()">
+                        <div class="number">${displayNumber}</div>
+                        <div class="details">${details.country || 'N/A'} | ${details.operator || 'N/A'}</div>
+                        <div class="copy-hint">Click to copy</div>
+                        <div class="copied-badge">Copied!</div>
+                    </div>
+                `;
+                adminCopyToClipboard(displayNumber);
+                showToast('Number copied to clipboard: ' + displayNumber);
+            }
+        }
+
+        function adminCopyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const badge = document.querySelector('.allocated-result .copied-badge');
+                    if (badge) {
+                        badge.classList.add('show');
+                        setTimeout(() => badge.classList.remove('show'), 2000);
+                    }
+                }).catch(() => {
+                    adminFallbackCopy(text);
+                });
+            } else {
+                adminFallbackCopy(text);
+            }
+        }
+
+        function adminFallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                const badge = document.querySelector('.allocated-result .copied-badge');
+                if (badge) {
+                    badge.classList.add('show');
+                    setTimeout(() => badge.classList.remove('show'), 2000);
+                }
+            } catch (e) {}
+            document.body.removeChild(textarea);
+        }
+
+        function adminHandleAllocatedNumberClick() {
+            if (!allocatedNumber) return;
+            let numberToCopy = allocatedNumber;
+            if (!adminCopyWithCountry) {
+                numberToCopy = numberToCopy.replace(/^\+/, '');
+            }
+            adminCopyToClipboard(numberToCopy);
+            showToast('Copied: ' + numberToCopy);
+        }
+
+        async function refreshAllocatePage() {
+            const resultDiv = document.getElementById('adminAllocateResult');
+            if (resultDiv) {
+                resultDiv.style.display = 'none';
+            }
+            const withCountry = document.getElementById('adminCopyWithCountry');
+            const withoutCountry = document.getElementById('adminCopyWithoutCountry');
+            if (withCountry && !withCountry.checked && !withoutCountry.checked) {
+                withCountry.checked = true;
+                adminCopyWithCountry = true;
+            }
+        }
+
+        // ===== ADMIN ACTIONS =====
+        function showCreateUser() { document.getElementById('createUserForm').style.display = 'block'; }
+        function hideCreateUser() { document.getElementById('createUserForm').style.display = 'none'; }
+
+        async function createUser() {
+            const u = document.getElementById('newUsername').value.trim();
+            const p = document.getElementById('newPassword').value;
+            const c = document.getElementById('confirmPassword').value;
+            const role = document.getElementById('newRole').value;
+            if (!u) { showToast('Username required', true); return; }
+            if (p !== c) { showToast('Passwords do not match', true); return; }
+            if (p.length < 3) { showToast('Min 3 characters', true); return; }
+            
+            try {
+                const response = await fetch(SUPABASE_URL + '/rest/v1/users', {
+                    method: 'POST',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': 'Bearer ' + SUPABASE_KEY,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: u, password: p, role: role })
+                });
+                if (response.status === 201 || response.status === 200 || response.status === 204) {
+                    await refreshAll();
+                    hideCreateUser();
+                    document.getElementById('newUsername').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                    refreshUsersList();
+                    showToast('User "' + u + '" created');
+                } else {
+                    showToast('Failed to create user', true);
+                }
+            } catch(e) {
+                showToast('Error: ' + e.message, true);
+            }
+        }
+
+        async function deleteUser(id) {
+            if (confirm('Delete this user and all their data?')) {
+                const userMessages = messages.filter(m => m.user_id === id);
+                for (const msg of userMessages) await apiFetch('messages?id=eq.' + msg.id, { method: 'DELETE' });
+                const userNumbers = numbers.filter(n => n.user_id === id);
+                for (const num of userNumbers) await apiFetch('assigned_numbers?id=eq.' + num.id, { method: 'DELETE' });
+                const userWithdrawals = withdrawals.filter(w => w.user_id === id);
+                for (const w of userWithdrawals) await apiFetch('withdrawals?id=eq.' + w.id, { method: 'DELETE' });
+                await apiFetch('users?id=eq.' + id, { method: 'DELETE' });
+                await refreshAll();
+                refreshUsersList();
+                showToast('User deleted');
+            }
+        }
+
+        async function deleteNumber(id) {
+            if (confirm('Delete this number?')) {
+                const num = numbers.find(n => n.id === id);
+                if (num) {
+                    const numMessages = messages.filter(m => m.from_number === num.number);
+                    for (const msg of numMessages) await apiFetch('messages?id=eq.' + msg.id, { method: 'DELETE' });
+                    await apiFetch('assigned_numbers?id=eq.' + id, { method: 'DELETE' });
+                    await refreshAll();
+                    refreshNumbersList();
+                    showToast('Number deleted');
+                }
+            }
+        }
+
+        async function adminAllocateNumber() {
+            const rangeId = document.getElementById('adminRangeId').value.trim();
+            const userId = document.getElementById('adminAssignUser').value;
+            const resultDiv = document.getElementById('adminAllocateResult');
+            
+            if (!rangeId || !userId) {
+                showToast('Enter range ID and select user', true);
+                return;
+            }
+            
+            try {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = 'Allocating...';
+                resultDiv.style.background = 'rgba(217,119,6,0.1)';
+                resultDiv.style.borderRadius = '14px';
+                resultDiv.style.padding = '16px';
+                
+                const result = await allocateNumber(rangeId);
+                if (result && result.full_number) {
+                    await saveNumberToDatabase(result.full_number, userId, 'R_' + rangeId);
+                    const user = users.find(u => u.id === userId);
+                    adminShowAllocatedNumber(result.full_number, result);
+                    await refreshAll();
+                    refreshNumbersList();
+                    showToast(result.full_number + ' allocated to ' + (user?.username || 'user'));
+                }
+            } catch (e) {
+                resultDiv.innerHTML = 'Error: ' + e.message;
+                resultDiv.style.background = 'rgba(220,38,38,0.1)';
+                showToast('Allocation failed', true);
+            }
+        }
+
+        async function markWithdrawalPaid(id) {
+            if (confirm('Mark this withdrawal as paid?')) {
+                await updateWithdrawalStatus(id, 'paid');
+                refreshAdminWithdrawals();
+                showToast('Withdrawal marked as paid');
+            }
+        }
+
+        async function rejectWithdrawal(id) {
+            if (confirm('Reject this withdrawal?')) {
+                await updateWithdrawalStatus(id, 'rejected');
+                refreshAdminWithdrawals();
+                showToast('Withdrawal rejected');
+            }
+        }
+
+        function applyAdminWithdrawFilter() { refreshAdminWithdrawals(); }
+        function resetAdminWithdrawFilter() {
+            document.getElementById('adminWithdrawFilter').value = 'all';
+            refreshAdminWithdrawals();
+        }
+
+        // ===== USER PANEL =====
+        let currentUserPage = 'dashboard';
+
+        function renderUserPanel() {
+            const menu = document.getElementById('sideMenu');
+            menu.innerHTML = `
+                <div class="menu-item active" data-page="dashboard"><span class="menu-icon">📊</span><span>Dashboard</span></div>
+                <div class="menu-item" data-page="earnings"><span class="menu-icon">📊</span><span>My Earnings</span></div>
+                <div class="menu-item" data-page="allocate"><span class="menu-icon">📞</span><span>Allocate Number</span></div>
+                <div class="menu-item" data-page="numbers"><span class="menu-icon">📞</span><span>My Numbers</span></div>
+                <div class="menu-item" data-page="withdraw"><span class="menu-icon">💰</span><span>Withdraw</span></div>
+                <div class="menu-item" data-page="history"><span class="menu-icon">📜</span><span>History</span></div>
+                <div class="menu-item" data-page="console"><span class="menu-icon">📡</span><span>Live Console</span></div>
+                <div class="menu-item" data-page="logout" style="margin-top:20px; border-top:1px solid var(--border);"><span class="menu-icon">🚪</span><span>Logout</span></div>
+            `;
+            
+            document.querySelectorAll('#sideMenu .menu-item').forEach(item => {
+                const page = item.dataset.page;
+                if (page && page !== 'logout') item.onclick = function() { userNavigate(page); toggleMenu(); };
+                else if (page === 'logout') item.onclick = function() { logout(); };
+            });
+            userNavigate('dashboard');
+        }
+
+        function userNavigate(page) {
+            currentUserPage = page;
+            const container = document.getElementById('mainContent');
+            const wallet = getUserWalletBalance(currentUser.id);
+            const totalEarnings = getUserEarnings(currentUser.id).earnings;
+            
+            if (page === 'dashboard') {
+                const userMessages = messages.filter(m => m.user_id === currentUser.id);
+                const todayOtps = countOtpsByDateRange(userMessages, 'today');
+                const yesterdayOtps = countOtpsByDateRange(userMessages, 'yesterday');
+                const weekOtps = countOtpsByDateRange(userMessages, 'week');
+                const monthOtps = countOtpsByDateRange(userMessages, 'month');
+                const allTimeOtps = userMessages.length;
+                
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>Dashboard</span>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+                                <span class="live-badge">LIVE</span>
+                                <span class="live-time" style="font-size:0.8rem;color:var(--text-light);font-family:monospace;"></span>
+                            </div>
+                        </div>
+                            <div class="stats-grid">
+                                <div class="stat-card"><div class="stat-number">${userMessages.length}</div><div class="stat-label">Total OTPs</div></div>
+                                <div class="stat-card warning"><div class="stat-number" style="color:var(--warning);">$${totalEarnings.toFixed(2)}</div><div class="stat-label">Total Earnings</div></div>
+                                <div class="stat-card"><div class="stat-number">${numbers.filter(n => n.user_id === currentUser.id).length}</div><div class="stat-label">My Numbers</div></div>
+                            </div>
+                            <div style="margin-top:20px;margin-bottom:20px;">
+                                <h4 style="color:var(--text-light);font-size:0.8rem;margin-bottom:12px;letter-spacing:0.5px;">MY OTP STATISTICS</h4>
+                                <div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));">
+                                    <div class="stat-card success" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;">${todayOtps}</div><div class="stat-label">Today</div></div>
+                                    <div class="stat-card warning" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--warning);">${yesterdayOtps}</div><div class="stat-label">Yesterday</div></div>
+                                    <div class="stat-card purple" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--purple);">${weekOtps}</div><div class="stat-label">This Week</div></div>
+                                    <div class="stat-card" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:#3b82f6;">${monthOtps}</div><div class="stat-label">This Month</div></div>
+                                    <div class="stat-card accent" style="padding:14px;"><div class="stat-number" style="font-size:1.4rem;color:var(--accent);">${allTimeOtps}</div><div class="stat-label">All Time</div></div>
+                                </div>
+                            </div>
+                            <div class="wallet-card">
+                                <div class="amount">$${wallet.toFixed(2)}</div>
+                                <div class="label">Available Balance</div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-top:10px;">
+                                <span class="status-indicator ${statusIndicator}">OTP: ${statusIndicator.toUpperCase()}</span>
+                                <span style="font-size:0.75rem;color:var(--text-light);">Tracking ${savedOtpIds.size} unique OTPs</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (page === 'earnings') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>My Earnings History</span></div>
+                            <div class="filter-bar">
+                                <div class="filter-group"><label>From Date</label><input type="date" id="userEarningsFrom"></div>
+                                <div class="filter-group"><label>To Date</label><input type="date" id="userEarningsTo"></div>
+                                <button class="btn-sm" onclick="applyUserEarningsFilter()">Apply</button>
+                                <button class="btn-sm btn-outline" onclick="resetUserEarningsFilter()">Reset</button>
+                            </div>
+                            <div id="userEarningsSummary" style="margin-bottom:20px;"></div>
+                            <div class="data-table">
+                                <table>
+                                    <thead><tr><th>Number</th><th>Message</th><th>Amount</th><th>Date</th></tr></thead>
+                                    <tbody id="userEarningsTable"></tbody>
+                                </table>
+                            </div>
+                            <div style="margin-top:20px;padding:16px;background:var(--hover-bg);border-radius:14px;text-align:center;">
+                                <strong>Total: <span id="userEarningsTotal" style="color:var(--warning);">$0.00</span></strong>
+                                <span style="margin-left:20px;font-size:0.8rem;color:var(--text-light);">(${messages.filter(m => m.user_id === currentUser.id).length} OTPs)</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                refreshUserEarnings();
+            }
+            else if (page === 'allocate') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>Allocate Number</span></div>
+                            <div style="padding:16px;background:var(--hover-bg);border-radius:14px;margin-bottom:20px;">
+                                <p style="font-size:0.85rem;color:var(--text-light);">Earn <strong style="color:var(--warning);">$${OTP_PRICE}</strong> per OTP</p>
+                            </div>
+                            <div class="copy-options">
+                                <label><input type="checkbox" id="userCopyWithCountry" checked onchange="userToggleCopyOption()"> Copy with country code (+)</label>
+                                <label><input type="checkbox" id="userCopyWithoutCountry" onchange="userToggleCopyOption()"> Copy without country code</label>
+                            </div>
+                            <div class="input-group"><label>Range ID</label><input type="text" id="userRangeId" value="26134"></div>
+                            <button onclick="userAllocateNumber()" class="btn-success">Allocate Number</button>
+                            <div id="userAllocateResult" style="margin-top:16px;display:none;"></div>
+                        </div>
+                        <div class="card"><div class="card-header"><span>My Numbers</span></div>
+                            <div id="userNumbersList"></div>
+                        </div>
+                    </div>
+                `;
+                refreshUserAllocatePage();
+            }
+            else if (page === 'numbers') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>My Numbers</span></div>
+                            <div id="userNumbersFullList"></div>
+                        </div>
+                    </div>
+                `;
+                refreshUserNumbersFull();
+            }
+            else if (page === 'withdraw') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>Withdraw Funds</span></div>
+                            <div class="wallet-card" style="margin-bottom:20px;">
+                                <div class="amount">$${wallet.toFixed(2)}</div>
+                                <div class="label">Available Balance</div>
+                                <div class="sub">Min withdrawal: $${MIN_WITHDRAWAL}</div>
+                            </div>
+                            <div class="input-group"><label>Amount ($)</label><input type="number" id="withdrawAmount" step="0.01" min="${MIN_WITHDRAWAL}" placeholder="0.00"></div>
+                            <div class="input-group"><label>Account Name</label><input type="text" id="withdrawAccountName" placeholder="Enter account holder name"></div>
+                            <div class="input-group"><label>Account Number</label><input type="text" id="withdrawAccountNumber" placeholder="Enter account number"></div>
+                            <div class="input-group"><label>Bank Name</label><input type="text" id="withdrawBankName" placeholder="Enter bank name"></div>
+                            <button onclick="requestUserWithdrawal()" class="btn-success">Request Withdrawal</button>
+                            <div id="withdrawResult" style="margin-top:16px;display:none;padding:16px;border-radius:14px;"></div>
+                        </div>
+                    </div>
+                `;
+            }
+            else if (page === 'history') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card"><div class="card-header"><span>Withdrawal History</span></div>
+                            <div id="userWithdrawalHistory"></div>
+                        </div>
+                    </div>
+                `;
+                refreshUserWithdrawalHistory();
+            }
+            else if (page === 'console') {
+                container.innerHTML = `
+                    <div class="page active-page">
+                        <div class="card">
+                            <div class="card-header"><span>📡 Live Console</span>
+                                <span style="font-size:0.75rem;color:var(--text-light);">Real-time hits from last 15 minutes</span>
+                            </div>
+
+                            <div class="console-status">
+                                <div>
+                                    <span class="dot offline" id="userConsoleStatusDot"></span>
+                                    <span id="userConsoleStatusText">Disconnected</span>
+                                </div>
+                                <div>
+                                    <span class="count" id="userConsoleHitCount">0</span> hits
+                                    <span class="time" id="userConsoleLastUpdate">-</span>
+                                </div>
+                            </div>
+
+                            <div class="console-controls">
+                                <button class="primary" id="userConsoleStartBtn" onclick="userConsoleToggleFeed()">▶ Start Feed</button>
+                                <button onclick="userConsoleFetchNow()">🔄 Refresh</button>
+                                <button class="danger" onclick="userConsoleClearHits()">🗑 Clear</button>
+                                <button class="scroll-btn" onclick="userConsoleScrollToTop()" title="Scroll to top" style="flex:0.5;min-width:50px;font-size:18px;">⬆</button>
+                            </div>
+
+                            <div class="console-scroll-indicator" id="userConsoleScrollIndicator" onclick="userConsoleScrollToTop()">
+                                <span class="arrow">⬆</span> Scroll to top for newest <span class="arrow">⬆</span>
+                            </div>
+
+                            <div class="console-hits" id="userConsoleHitsContainer">
+                                <div class="console-empty">
+                                    <div class="icon">📭</div>
+                                    <div>No hits yet</div>
+                                    <div style="font-size:12px;margin-top:8px;">Click "Start Feed" to begin</div>
+                                </div>
+                            </div>
+
+                            <div class="console-footer">
+                                Press <kbd>Space</kbd> to toggle &nbsp;·&nbsp; Click number to copy
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                setTimeout(() => {
+                    const container = document.getElementById('userConsoleHitsContainer');
+                    if (container) {
+                        container.addEventListener('scroll', userConsoleCheckScrollPosition);
+                    }
+                    setTimeout(userConsoleStartFeed, 500);
+                }, 100);
+            }
+            
+            setTimeout(() => {
+                const withCountry = document.getElementById('userCopyWithCountry');
+                const withoutCountry = document.getElementById('userCopyWithoutCountry');
+                if (withCountry && !withCountry.checked && !withoutCountry.checked) {
+                    withCountry.checked = true;
+                    userCopyWithCountry = true;
+                }
+                updateTimeDisplay();
+            }, 100);
+            
+            document.querySelectorAll('#sideMenu .menu-item').forEach(item => item.classList.remove('active'));
+            const activeItem = document.querySelector('#sideMenu .menu-item[data-page="' + page + '"]');
+            if (activeItem) activeItem.classList.add('active');
+        }
+
+        function refreshCurrentUserView() {
+            if (currentUserPage === 'dashboard') {
+                userNavigate('dashboard');
+            }
+            else if (currentUserPage === 'earnings') refreshUserEarnings();
+            else if (currentUserPage === 'allocate') refreshUserAllocatePage();
+            else if (currentUserPage === 'numbers') refreshUserNumbersFull();
+            else if (currentUserPage === 'history') refreshUserWithdrawalHistory();
+            updateTimeDisplay();
+        }
+
+        // ===== USER EARNINGS =====
+        function refreshUserEarnings() {
+            const fromDate = document.getElementById('userEarningsFrom')?.value || '';
+            const toDate = document.getElementById('userEarningsTo')?.value || '';
+            
+            let userMessages = messages.filter(m => m.user_id === currentUser.id);
+            if (fromDate) {
+                const from = new Date(fromDate);
+                from.setUTCHours(0,0,0,0);
+                userMessages = userMessages.filter(m => new Date(m.created_at) >= from);
+            }
+            if (toDate) {
+                const to = new Date(toDate);
+                to.setUTCHours(23,59,59,999);
+                userMessages = userMessages.filter(m => new Date(m.created_at) <= to);
+            }
+            
+            const total = userMessages.length * OTP_PRICE;
+            
+            const summaryDiv = document.getElementById('userEarningsSummary');
+            if (summaryDiv) {
+                summaryDiv.innerHTML = `
+                    <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr);">
+                        <div class="stat-card"><div class="stat-number">${userMessages.length}</div><div class="stat-label">OTPs</div></div>
+                        <div class="stat-card warning"><div class="stat-number" style="color:var(--warning);">$${total.toFixed(2)}</div><div class="stat-label">Earnings</div></div>
+                    </div>
+                `;
+            }
+            
+            const tbody = document.getElementById('userEarningsTable');
+            if (tbody) {
+                if (userMessages.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:40px;color:var(--text-light);">No earnings in this period</td></tr>';
+                } else {
+                    tbody.innerHTML = userMessages.slice(0, 100).map(m => {
+                        return '<tr>' +
+                            '<td>' + escapeHtml(m.from_number) + '</td>' +
+                            '<td>' + escapeHtml(m.content || '').substring(0, 50) + '</td>' +
+                            '<td style="color:var(--warning);font-weight:600;">+$' + OTP_PRICE.toFixed(3) + '</td>' +
+                            '<td>' + new Date(m.created_at).toLocaleDateString() + '</td>' +
+                        '</tr>';
+                    }).join('');
+                }
+            }
+            
+            document.getElementById('userEarningsTotal').textContent = '$' + total.toFixed(2);
+        }
+
+        function applyUserEarningsFilter() {
+            refreshUserEarnings();
+            showToast('Filter applied');
+        }
+
+        function resetUserEarningsFilter() {
+            document.getElementById('userEarningsFrom').value = '';
+            document.getElementById('userEarningsTo').value = '';
+            refreshUserEarnings();
+            showToast('Filter reset');
+        }
+
+        // ===== USER ALLOCATE =====
+        let userCopyWithCountry = true;
+
+        function userToggleCopyOption() {
+            const withCountry = document.getElementById('userCopyWithCountry');
+            const withoutCountry = document.getElementById('userCopyWithoutCountry');
+            if (withCountry.checked && withoutCountry.checked) {
+                if (event && event.target === withCountry) {
+                    withoutCountry.checked = false;
+                } else {
+                    withCountry.checked = false;
+                }
+            }
+            if (!withCountry.checked && !withoutCountry.checked) {
+                withCountry.checked = true;
+            }
+            userCopyWithCountry = withCountry.checked;
+        }
+
+        function userShowAllocatedNumber(number, details) {
+            const resultDiv = document.getElementById('userAllocateResult');
+            if (resultDiv) {
+                allocatedNumber = number;
+                const displayNumber = userCopyWithCountry ? number : number.replace(/^\+/, '');
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = `
+                    <div class="allocated-result" onclick="userHandleAllocatedNumberClick()">
+                        <div class="number">${displayNumber}</div>
+                        <div class="details">${details.country || 'N/A'} | ${details.operator || 'N/A'}</div>
+                        <div class="copy-hint">Click to copy</div>
+                        <div class="copied-badge">Copied!</div>
+                    </div>
+                `;
+                userCopyToClipboard(displayNumber);
+                showToast('Number copied to clipboard: ' + displayNumber);
+            }
+        }
+
+        function userCopyToClipboard(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    const badge = document.querySelector('.allocated-result .copied-badge');
+                    if (badge) {
+                        badge.classList.add('show');
+                        setTimeout(() => badge.classList.remove('show'), 2000);
+                    }
+                }).catch(() => {
+                    userFallbackCopy(text);
+                });
+            } else {
+                userFallbackCopy(text);
+            }
+        }
+
+        function userFallbackCopy(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            try {
+                document.execCommand('copy');
+                const badge = document.querySelector('.allocated-result .copied-badge');
+                if (badge) {
+                    badge.classList.add('show');
+                    setTimeout(() => badge.classList.remove('show'), 2000);
+                }
+            } catch (e) {}
+            document.body.removeChild(textarea);
+        }
+
+        function userHandleAllocatedNumberClick() {
+            if (!allocatedNumber) return;
+            let numberToCopy = allocatedNumber;
+            if (!userCopyWithCountry) {
+                numberToCopy = numberToCopy.replace(/^\+/, '');
+            }
+            userCopyToClipboard(numberToCopy);
+            showToast('Copied: ' + numberToCopy);
+        }
+
+        async function refreshUserAllocatePage() {
+            await refreshAll();
+            const userNumbers = numbers.filter(n => n.user_id === currentUser.id);
+            const container = document.getElementById('userNumbersList');
+            if (container) {
+                container.innerHTML = userNumbers.map(n => {
+                    const count = getOtpCount(n.number);
+                    const isActive = count > 0;
+                    const countryInfo = getCountryInfo(n.number);
+                    return '<div class="number-card ' + (isActive ? 'active' : '') + '">' +
+                        '<div><span class="number">' + escapeHtml(n.number) + '</span> <span class="country-code">' + countryInfo.flag + ' ' + countryInfo.name + '</span></div>' +
+                        '<div class="details">' +
+                            '<span class="otp-count">' + count + ' OTPs</span>' +
+                            (isActive ? '<span class="badge-otp">Active</span>' : '') +
+                        '</div>' +
+                        '<div class="details">Earnings: <span class="earnings">$' + (count * OTP_PRICE).toFixed(2) + '</span></div>' +
+                    '</div>';
+                }).join('') || '<div style="text-align:center;padding:20px;color:var(--text-light);">No numbers allocated</div>';
+            }
+            const withCountry = document.getElementById('userCopyWithCountry');
+            const withoutCountry = document.getElementById('userCopyWithoutCountry');
+            if (withCountry && !withCountry.checked && !withoutCountry.checked) {
+                withCountry.checked = true;
+                userCopyWithCountry = true;
+            }
+        }
+
+        async function refreshUserNumbersFull() {
+            await refreshAll();
+            const userNumbers = numbers.filter(n => n.user_id === currentUser.id);
+            const container = document.getElementById('userNumbersFullList');
+            if (container) {
+                container.innerHTML = userNumbers.map(n => {
+                    const count = getOtpCount(n.number);
+                    const isActive = count > 0;
+                    const countryInfo = getCountryInfo(n.number);
+                    return '<div class="number-card ' + (isActive ? 'active' : '') + '">' +
+                        '<div><span class="number">' + escapeHtml(n.number) + '</span> <span class="country-code">' + countryInfo.flag + ' ' + countryInfo.name + '</span></div>' +
+                        '<div class="details">' +
+                            '<span class="otp-count">' + count + ' OTPs</span>' +
+                            (isActive ? '<span class="badge-otp">Active</span>' : '') +
+                        '</div>' +
+                        '<div class="details">Earnings: <span class="earnings">$' + (count * OTP_PRICE).toFixed(2) + '</span></div>' +
+                        '<div style="font-size:0.7rem;color:var(--text-light);">' + (n.created_at ? new Date(n.created_at).toLocaleDateString() : '-') + '</div>' +
+                    '</div>';
+                }).join('') || '<div style="text-align:center;padding:20px;color:var(--text-light);">No numbers</div>';
+            }
+        }
+
+        async function refreshUserWithdrawalHistory() {
+            await refreshAll();
+            const userWithdrawals = withdrawals.filter(w => w.user_id === currentUser.id);
+            const container = document.getElementById('userWithdrawalHistory');
+            if (container) {
+                container.innerHTML = userWithdrawals.map(w => {
+                    return '<div class="item-card">' +
+                        '<div><strong>$' + parseFloat(w.amount).toFixed(2) + '</strong></div>' +
+                        '<div>' + escapeHtml(w.bank_name) + ' - ' + escapeHtml(w.account_number) + '</div>' +
+                        '<div>' + escapeHtml(w.account_name) + '</div>' +
+                        '<div><span class="badge ' + (w.status === 'paid' ? 'badge-paid' : w.status === 'rejected' ? 'badge-rejected' : 'badge-pending') + '">' + w.status + '</span></div>' +
+                        '<div style="font-size:0.7rem;color:var(--text-light);">' + new Date(w.created_at).toLocaleDateString() + '</div>' +
+                    '</div>';
+                }).join('') || '<div style="text-align:center;padding:40px;color:var(--text-light);">No withdrawals yet</div>';
+            }
+        }
+
+        // ===== USER ACTIONS =====
+        async function userAllocateNumber() {
+            const rangeId = document.getElementById('userRangeId').value.trim();
+            const resultDiv = document.getElementById('userAllocateResult');
+            
+            if (!rangeId) { showToast('Enter Range ID', true); return; }
+            
+            try {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = 'Allocating...';
+                resultDiv.style.background = 'rgba(217,119,6,0.1)';
+                resultDiv.style.borderRadius = '14px';
+                resultDiv.style.padding = '16px';
+                
+                const result = await allocateNumber(rangeId);
+                if (result && result.full_number) {
+                    await saveNumberToDatabase(result.full_number, currentUser.id, 'R_' + rangeId);
+                    userShowAllocatedNumber(result.full_number, result);
+                    await refreshAll();
+                    refreshUserAllocatePage();
+                    showToast(result.full_number + ' allocated!');
+                }
+            } catch (e) {
+                resultDiv.innerHTML = 'Error: ' + e.message;
+                resultDiv.style.background = 'rgba(220,38,38,0.1)';
+                showToast('Allocation failed', true);
+            }
+        }
+
+        async function requestUserWithdrawal() {
+            const amount = parseFloat(document.getElementById('withdrawAmount').value);
+            const accountName = document.getElementById('withdrawAccountName').value.trim();
+            const accountNumber = document.getElementById('withdrawAccountNumber').value.trim();
+            const bankName = document.getElementById('withdrawBankName').value.trim();
+            const resultDiv = document.getElementById('withdrawResult');
+            
+            if (!amount || amount < MIN_WITHDRAWAL) {
+                showToast('Minimum withdrawal is $' + MIN_WITHDRAWAL, true);
+                return;
+            }
+            if (!accountName || !accountNumber || !bankName) {
+                showToast('Please fill all bank details', true);
+                return;
+            }
+            
+            try {
+                resultDiv.style.display = 'block';
+                resultDiv.innerHTML = 'Processing...';
+                resultDiv.style.background = 'rgba(217,119,6,0.1)';
+                
+                await requestWithdrawal(currentUser.id, amount, accountName, accountNumber, bankName);
+                resultDiv.innerHTML = '✅ Withdrawal request of $' + amount.toFixed(2) + ' submitted!';
+                resultDiv.style.background = 'rgba(13,148,136,0.1)';
+                
+                document.getElementById('withdrawAmount').value = '';
+                document.getElementById('withdrawAccountName').value = '';
+                document.getElementById('withdrawAccountNumber').value = '';
+                document.getElementById('withdrawBankName').value = '';
+                
+                await refreshAll();
+                showToast('Withdrawal request submitted!');
+            } catch (e) {
+                resultDiv.innerHTML = '❌ Error: ' + e.message;
+                resultDiv.style.background = 'rgba(220,38,38,0.1)';
+                showToast(e.message, true);
+            }
+        }
+
+        // ===== USER CONSOLE FUNCTIONS =====
+        let userConsoleFeedInterval = null;
+        let isUserConsoleRunning = false;
+        let userConsoleHitCount = 0;
+        let userConsoleKnownHits = new Set();
+        let isUserConsoleScrolledToTop = true;
+
+        function userConsoleSetStatus(type, message) {
+            const dot = document.getElementById('userConsoleStatusDot');
+            const text = document.getElementById('userConsoleStatusText');
+            
+            dot.className = 'dot';
+            if (type === 'online') {
+                dot.classList.add('online');
+                text.textContent = message || 'Connected';
+            } else if (type === 'error') {
+                dot.classList.add('offline');
+                text.textContent = '⚠️ ' + message;
+            } else if (type === 'checking') {
+                dot.classList.add('checking');
+                text.textContent = '⏳ ' + message;
+            } else {
+                dot.classList.add('offline');
+                text.textContent = message || 'Disconnected';
+            }
+        }
+
+        async function userConsoleFetchHits() {
+            const url = CONSOLE_BASE_URL + '/console';
+            
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'mauthapi': CONSOLE_TOKEN,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.meta?.code !== 200) {
+                    throw new Error(data.message || 'API error');
+                }
+
+                let hits = data.data?.hits || data.data?.otps || [];
+                
+                if (data.data?.otps && !data.data?.hits) {
+                    hits = data.data.otps.map(otp => ({
+                        range: otp.number || 'N/A',
+                        sid: extractSid(otp.message),
+                        message: otp.message,
+                        time: otp.time
+                    }));
+                }
+
+                hits.sort((a, b) => b.time - a.time);
+                return hits;
+            } catch (error) {
+                console.error('User console fetch error:', error);
+                return null;
+            }
+        }
+
+        function userConsoleCreateHitElement(hit, isNew = false) {
+            const div = document.createElement('div');
+            div.className = 'console-hit';
+            
+            const countryInfo = getCountryInfo(hit.range);
+            const maskedRange = hit.range ? maskNumber(hit.range) : 'N/A';
+            
+            const rangeSpan = document.createElement('span');
+            rangeSpan.className = 'range';
+            rangeSpan.textContent = maskedRange;
+            rangeSpan.title = 'Click to copy (full number)';
+            
+            div.addEventListener('click', function(e) {
+                consoleCopyNumber(hit.range, this);
+            });
+            
+            const toast = document.createElement('span');
+            toast.className = 'copied-toast';
+            toast.textContent = '📋 Copy';
+            div.appendChild(toast);
+            
+            const sidSpan = document.createElement('span');
+            sidSpan.className = 'sid';
+            sidSpan.textContent = hit.sid || 'Unknown';
+            
+            const messageSpan = document.createElement('span');
+            messageSpan.className = 'message';
+            messageSpan.textContent = hit.message || '';
+            
+            const timeSpan = document.createElement('span');
+            timeSpan.className = 'time';
+            timeSpan.textContent = consoleFormatTimeAgo(hit.time);
+            
+            const countryTag = document.createElement('span');
+            countryTag.className = 'country-tag';
+            countryTag.textContent = `${countryInfo.flag} ${countryInfo.name}`;
+            
+            div.appendChild(rangeSpan);
+            div.appendChild(sidSpan);
+            div.appendChild(messageSpan);
+            div.appendChild(countryTag);
+            div.appendChild(timeSpan);
+            
+            if (isNew) {
+                const badge = document.createElement('span');
+                badge.className = 'badge-new';
+                badge.textContent = 'NEW';
+                div.appendChild(badge);
+            }
+            
+            return div;
+        }
+
+        function userConsoleRenderHits(hits) {
+            const container = document.getElementById('userConsoleHitsContainer');
+            
+            while (container.firstChild) {
+                container.removeChild(container.firstChild);
+            }
+
+            if (!hits || hits.length === 0) {
+                container.innerHTML = `
+                    <div class="console-empty">
+                        <div class="icon">📭</div>
+                        <div>No hits yet</div>
+                        <div style="font-size:12px;margin-top:8px;">Click "Start Feed" to begin</div>
+                    </div>
+                `;
+                return;
+            }
+
+            hits.forEach((hit, index) => {
+                const isNew = index < 5;
+                const div = userConsoleCreateHitElement(hit, isNew);
+                container.appendChild(div);
+            });
+
+            userConsoleHitCount = hits.length;
+            document.getElementById('userConsoleHitCount').textContent = userConsoleHitCount;
+
+            if (isUserConsoleScrolledToTop) {
+                container.scrollTop = 0;
+            }
+        }
+
+        function userConsoleAddNewHits(newHits) {
+            if (!newHits || newHits.length === 0) return 0;
+
+            const container = document.getElementById('userConsoleHitsContainer');
+            const emptyState = container.querySelector('.console-empty');
+            if (emptyState) emptyState.remove();
+
+            let added = 0;
+            newHits.forEach((hit) => {
+                const key = `${hit.range}_${hit.sid}_${hit.message}_${hit.time}`;
+                if (userConsoleKnownHits.has(key)) return;
+                userConsoleKnownHits.add(key);
+
+                const div = userConsoleCreateHitElement(hit, true);
+                container.insertBefore(div, container.firstChild);
+                added++;
+            });
+
+            while (container.children.length > 100) {
+                container.removeChild(container.lastChild);
+            }
+
+            userConsoleHitCount += added;
+            document.getElementById('userConsoleHitCount').textContent = userConsoleHitCount;
+
+            if (isUserConsoleScrolledToTop) {
+                container.scrollTop = 0;
+            } else {
+                document.getElementById('userConsoleScrollIndicator').style.display = 'block';
+            }
+
+            return added;
+        }
+
+        async function userConsoleFetchAndUpdate() {
+            const hits = await userConsoleFetchHits();
+            
+            if (!hits) return;
+
+            if (hits.length === 0) {
+                userConsoleSetStatus('info', 'No hits found');
+                userConsoleRenderHits([]);
+                return;
+            }
+
+            if (userConsoleHitCount === 0) {
+                userConsoleRenderHits(hits);
+                const total = hits.length;
+                document.getElementById('userConsoleLastUpdate').textContent = `Last: ${new Date().toLocaleTimeString()}`;
+                userConsoleSetStatus('online', `${total} hits loaded`);
+                return;
+            }
+
+            const newHits = hits.filter(hit => {
+                const key = `${hit.range}_${hit.sid}_${hit.message}_${hit.time}`;
+                return !userConsoleKnownHits.has(key);
+            });
+
+            if (newHits.length > 0) {
+                const added = userConsoleAddNewHits(newHits);
+                document.getElementById('userConsoleLastUpdate').textContent = `Last: ${new Date().toLocaleTimeString()}`;
+                userConsoleSetStatus('online', `+${added} new hit${added > 1 ? 's' : ''} (${userConsoleHitCount} total)`);
+            } else {
+                userConsoleSetStatus('online', `${userConsoleHitCount} hits (no new)`);
+            }
+        }
+
+        function userConsoleCheckScrollPosition() {
+            const container = document.getElementById('userConsoleHitsContainer');
+            if (!container) return;
+            isUserConsoleScrolledToTop = container.scrollTop < 50;
+            const indicator = document.getElementById('userConsoleScrollIndicator');
+            if (!isUserConsoleScrolledToTop && userConsoleHitCount > 0) {
+                indicator.style.display = 'block';
+            } else {
+                indicator.style.display = 'none';
+            }
+        }
+
+        function userConsoleScrollToTop() {
+            const container = document.getElementById('userConsoleHitsContainer');
+            container.scrollTop = 0;
+            isUserConsoleScrolledToTop = true;
+            document.getElementById('userConsoleScrollIndicator').style.display = 'none';
+        }
+
+        function userConsoleToggleFeed() {
+            if (isUserConsoleRunning) {
+                userConsoleStopFeed();
+            } else {
+                userConsoleStartFeed();
+            }
+        }
+
+        function userConsoleStartFeed() {
+            if (isUserConsoleRunning) return;
+
+            isUserConsoleRunning = true;
+            const btn = document.getElementById('userConsoleStartBtn');
+            btn.textContent = '⏹ Running...';
+            btn.classList.add('running');
+            
+            userConsoleSetStatus('checking', 'Connecting...');
+
+            userConsoleKnownHits = new Set();
+            userConsoleHitCount = 0;
+
+            userConsoleFetchAndUpdate();
+            userConsoleFeedInterval = setInterval(userConsoleFetchAndUpdate, 8000);
+        }
+
+        function userConsoleStopFeed() {
+            if (userConsoleFeedInterval) {
+                clearInterval(userConsoleFeedInterval);
+                userConsoleFeedInterval = null;
+            }
+            isUserConsoleRunning = false;
+            const btn = document.getElementById('userConsoleStartBtn');
+            btn.textContent = '▶ Start Feed';
+            btn.classList.remove('running');
+            userConsoleSetStatus('offline', 'Stopped');
+        }
+
+        async function userConsoleFetchNow() {
+            if (isUserConsoleRunning) {
+                userConsoleSetStatus('checking', 'Refreshing...');
+                await userConsoleFetchAndUpdate();
+            } else {
+                userConsoleSetStatus('checking', 'Fetching...');
+                await userConsoleFetchAndUpdate();
+                userConsoleSetStatus('offline', 'Stopped (refresh done)');
+            }
+        }
+
+        function userConsoleClearHits() {
+            userConsoleKnownHits = new Set();
+            userConsoleHitCount = 0;
+            userConsoleRenderHits([]);
+            document.getElementById('userConsoleHitCount').textContent = '0';
+            document.getElementById('userConsoleLastUpdate').textContent = '-';
+            document.getElementById('userConsoleScrollIndicator').style.display = 'none';
+            userConsoleSetStatus('offline', 'Cleared');
+            isUserConsoleScrolledToTop = true;
+        }
+
+        // ===== LOGOUT =====
+        function logout() {
+            if (refreshInterval) clearInterval(refreshInterval);
+            if (otpPollingInterval) clearInterval(otpPollingInterval);
+            if (timerInterval) clearInterval(timerInterval);
+            if (consoleFeedInterval) clearInterval(consoleFeedInterval);
+            if (userConsoleFeedInterval) clearInterval(userConsoleFeedInterval);
+            currentUser = null;
+            savedOtpIds = new Set();
+            document.getElementById('loginOverlay').style.display = 'flex';
+            document.getElementById('menuBtn').style.display = 'none';
+            document.getElementById('settingsBtn').style.display = 'none';
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // ===== SETTINGS =====
+        document.getElementById('settingsBtn').onclick = function() {
+            document.getElementById('currentUserDisplay').value = currentUser?.username || '';
+            document.getElementById('settingsModal').classList.add('show');
+        };
+        document.getElementById('closeModalBtn').onclick = function() {
+            document.getElementById('settingsModal').classList.remove('show');
+            document.getElementById('oldPassword').value = '';
+            document.getElementById('newPasswordField').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        };
+        document.getElementById('changePasswordBtn').onclick = async function() {
+            const oldPass = document.getElementById('oldPassword').value;
+            const newPass = document.getElementById('newPasswordField').value;
+            const confirmPass = document.getElementById('confirmNewPassword').value;
+            if(await changePassword(oldPass, newPass, confirmPass)) {
+                document.getElementById('settingsModal').classList.remove('show');
+                document.getElementById('oldPassword').value = '';
+                document.getElementById('newPasswordField').value = '';
+                document.getElementById('confirmNewPassword').value = '';
+            }
+        };
+
+        // ===== THEME =====
+        const savedTheme = localStorage.getItem('sms_theme') || 'light';
+        setTheme(savedTheme);
+        document.getElementById('lightThemeBtn').onclick = function() { setTheme('light'); };
+        document.getElementById('darkThemeBtn').onclick = function() { setTheme('dark'); };
+
+        // ===== EXPOSE FUNCTIONS =====
+        window.adminNavigate = adminNavigate;
+        window.userNavigate = userNavigate;
+        window.showCreateUser = showCreateUser;
+        window.hideCreateUser = hideCreateUser;
+        window.createUser = createUser;
+        window.deleteUser = deleteUser;
+        window.deleteNumber = deleteNumber;
+        window.adminAllocateNumber = adminAllocateNumber;
+        window.userAllocateNumber = userAllocateNumber;
+        window.markWithdrawalPaid = markWithdrawalPaid;
+        window.rejectWithdrawal = rejectWithdrawal;
+        window.applyAdminWithdrawFilter = applyAdminWithdrawFilter;
+        window.resetAdminWithdrawFilter = resetAdminWithdrawFilter;
+        window.applyAdminEarningsFilter = applyAdminEarningsFilter;
+        window.resetAdminEarningsFilter = resetAdminEarningsFilter;
+        window.applyUserEarningsFilter = applyUserEarningsFilter;
+        window.resetUserEarningsFilter = resetUserEarningsFilter;
+        window.requestUserWithdrawal = requestUserWithdrawal;
+        window.doLogin = doLogin;
+        window.toggleMenu = toggleMenu;
+        window.adminToggleCopyOption = adminToggleCopyOption;
+        window.userToggleCopyOption = userToggleCopyOption;
+        window.adminHandleAllocatedNumberClick = adminHandleAllocatedNumberClick;
+        window.userHandleAllocatedNumberClick = userHandleAllocatedNumberClick;
+        window.renderUserActivity = renderUserActivity;
+        window.refreshUserActivity = refreshUserActivity;
+        window.toggleUserActivity = toggleUserActivity;
+        
+        window.consoleToggleFeed = consoleToggleFeed;
+        window.consoleFetchNow = consoleFetchNow;
+        window.consoleClearHits = consoleClearHits;
+        window.consoleScrollToTop = consoleScrollToTop;
+        window.userConsoleToggleFeed = userConsoleToggleFeed;
+        window.userConsoleFetchNow = userConsoleFetchNow;
+        window.userConsoleClearHits = userConsoleClearHits;
+        window.userConsoleScrollToTop = userConsoleScrollToTop;
+
+        document.addEventListener('keydown', function(e) {
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+            if (e.key === ' ') {
+                e.preventDefault();
+                if (currentUser?.role === 'admin') {
+                    if (currentAdminPage === 'console') {
+                        consoleToggleFeed();
+                    }
+                } else {
+                    if (currentUserPage === 'console') {
+                        userConsoleToggleFeed();
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
