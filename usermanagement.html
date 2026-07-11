@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Management</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0a0a0f;
+            color: #e8e4dc;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 750px; margin: 0 auto; }
+        .card {
+            background: #1a1a2e;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid #2a2a4a;
+        }
+        h1 { color: #40916c; font-size: 1.5rem; margin-bottom: 4px; }
+        .subtitle { color: #9a9ab5; font-size: 0.9rem; margin-bottom: 20px; }
+        
+        label { display: block; font-weight: 500; font-size: 0.85rem; margin-bottom: 6px; color: #9a9ab5; }
+        select, input, textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 2px solid #2a2a4a;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            background: #0a0a0f;
+            color: #e8e4dc;
+            transition: all 0.2s;
+        }
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #40916c;
+            box-shadow: 0 0 0 3px rgba(64, 145, 108, 0.2);
+        }
+        textarea { resize: vertical; min-height: 60px; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 12px; }
+        button {
+            padding: 10px 24px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            min-width: 80px;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); }
+        button:active { transform: translateY(0); }
+        
+        .btn-execute { background: #2d6a4f; color: white; }
+        .btn-execute:hover { background: #40916c; }
+        .btn-refresh { background: #6b7280; color: white; }
+        .btn-refresh:hover { background: #4b5563; }
+        
+        .user-info {
+            background: #0a0a0f;
+            border-radius: 10px;
+            padding: 16px;
+            margin-top: 16px;
+            border: 1px solid #2a2a4a;
+            display: none;
+        }
+        .user-info.show { display: block; }
+        .user-info .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .user-info .row:last-child { border-bottom: none; }
+        .user-info .label { color: #9a9ab5; font-weight: 500; }
+        .user-info .value { font-weight: 600; }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-badge.active { background: #0d9488; color: white; }
+        .status-badge.suspended { background: #dc2626; color: white; }
+        
+        .result {
+            background: #0a0a0f;
+            border-radius: 10px;
+            padding: 14px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            border: 1px solid #2a2a4a;
+            min-height: 50px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .result.success { border-color: #0d9488; color: #0d9488; }
+        .result.error { border-color: #dc2626; color: #dc2626; }
+        .result.loading { border-color: #d97706; color: #d97706; }
+        
+        .inline-flex { display: flex; gap: 10px; align-items: center; }
+        .inline-flex select { flex: 1; }
+        .inline-flex button { flex: 0 0 auto; width: auto; padding: 10px 20px; }
+        
+        .user-list {
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 12px;
+            border-bottom: 1px solid #2a2a4a;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background 0.2s;
+            font-size: 0.9rem;
+        }
+        .user-item:hover { background: #1f1f35; }
+        .user-item.selected { background: #2d6a4f; }
+        
+        .history-section {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px solid #2a2a4a;
+        }
+        .history-section .title {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #9a9ab5;
+            margin-bottom: 8px;
+        }
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 10px;
+            background: #0a0a0f;
+            border-radius: 6px;
+            margin-bottom: 4px;
+            font-size: 0.8rem;
+            border-left: 3px solid #2a2a4a;
+        }
+        .history-item.deduction { border-left-color: #dc2626; }
+        .history-item.addition { border-left-color: #0d9488; }
+        .history-item.withdrawal { border-left-color: #d97706; }
+        .history-item .amount.negative { color: #dc2626; }
+        .history-item .amount.positive { color: #0d9488; }
+        .history-item .amount.withdrawal-amount { color: #d97706; }
+        .history-item .date { color: #6b7280; font-size: 0.7rem; }
+        
+        .history-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-top: 12px;
+        }
+        .history-grid .col .title {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #9a9ab5;
+            margin-bottom: 6px;
+        }
+        
+        .mt-10 { margin-top: 10px; }
+        .hidden { display: none; }
+        
+        @media (max-width: 600px) {
+            .container { padding: 0; }
+            .card { padding: 16px; }
+            .inline-flex { flex-direction: column; }
+            .inline-flex button { width: 100%; }
+            .btn-group { flex-direction: column; }
+            .history-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>👥 User Management</h1>
+            <p class="subtitle">Select user → Select action → Execute</p>
+            
+            <div class="inline-flex">
+                <select id="userSelect">
+                    <option value="">— Loading users... —</option>
+                </select>
+                <button class="btn-refresh" onclick="loadData()">🔄</button>
+            </div>
+            
+            <div class="user-info" id="userInfo">
+                <div class="row">
+                    <span class="label">Username</span>
+                    <span class="value" id="displayUsername">-</span>
+                </div>
+                <div class="row">
+                    <span class="label">Role</span>
+                    <span class="value" id="displayRole">-</span>
+                </div>
+                <div class="row">
+                    <span class="label">Status</span>
+                    <span class="value" id="displayStatus">-</span>
+                </div>
+                <div class="row" id="reasonRow" style="display:none;">
+                    <span class="label">Reason</span>
+                    <span class="value" id="displayReason">-</span>
+                </div>
+                <div class="row">
+                    <span class="label">Balance</span>
+                    <span class="value" id="displayBalance">$0.00</span>
+                </div>
+                <div class="row">
+                    <span class="label">Total OTPs</span>
+                    <span class="value" id="displayOtps">0</span>
+                </div>
+                
+                <div class="history-grid">
+                    <div class="col">
+                        <div class="title">🔴 Deductions (Violations)</div>
+                        <div id="deductionList">None</div>
+                    </div>
+                    <div class="col">
+                        <div class="title">🟢 Additions (Bonus)</div>
+                        <div id="additionList">None</div>
+                    </div>
+                </div>
+                
+                <div class="history-section">
+                    <div class="title">🟡 Withdrawal History (User Requests Only)</div>
+                    <div id="withdrawalList">No withdrawals</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <label for="actionSelect">Select Action</label>
+            <select id="actionSelect">
+                <option value="">— Select Action —</option>
+                <option value="suspend">🚫 Suspend User</option>
+                <option value="unsuspend">✅ Unsuspend User</option>
+                <option value="deduct">➖ Deduct Balance (Violation)</option>
+                <option value="add">➕ Add Balance (Bonus)</option>
+            </select>
+            
+            <div id="reasonGroup" class="hidden" style="margin-top:12px;">
+                <label for="reasonInput">Reason</label>
+                <input type="text" id="reasonInput" placeholder="Enter reason..." value="Admin action">
+            </div>
+            
+            <div id="amountGroup" class="hidden" style="margin-top:12px;">
+                <label for="amountInput">Amount ($)</label>
+                <input type="number" id="amountInput" value="5.00" step="0.01" min="0.01">
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn-execute" onclick="executeAction()">▶ Execute</button>
+            </div>
+            
+            <div id="result" class="result">Select a user and action...</div>
+        </div>
+
+        <div class="card">
+            <h2 style="font-size:1rem; margin-bottom:12px; color:#9a9ab5;">📋 All Users</h2>
+            <div id="userList" class="user-list">Loading...</div>
+        </div>
+    </div>
+
+    <script>
+        // ===== CONFIGURATION =====
+        const SUPABASE_URL = "https://auyudnqjokutmdwzrfmd.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1eXVkbnFqb2t1dG1kd3pyZm1kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMDYxMTQsImV4cCI6MjA5NjU4MjExNH0.7RdElUcJXdzD02WZzFvPsErHv6RiEx8zBOvTxbpVI3g";
+        const OTP_PRICE = 0.005;
+        
+        let users = [];
+        let messages = [];
+        let withdrawals = [];
+        let selectedUserId = null;
+
+        // ===== API FUNCTIONS =====
+        async function apiFetch(path, options = {}) {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+                headers: { 
+                    'apikey': SUPABASE_KEY, 
+                    'Authorization': `Bearer ${SUPABASE_KEY}`, 
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=representation'
+                },
+                ...options
+            });
+            if (response.status === 204) return [];
+            return response.json();
+        }
+
+        // ===== BALANCE CALCULATION =====
+        function calculateBalance(userId) {
+            const userMessages = messages.filter(m => m.user_id === userId);
+            const totalEarnings = userMessages.length * OTP_PRICE;
+            
+            // ONLY user withdrawals (not deductions or additions)
+            const paidWithdrawals = withdrawals.filter(w => 
+                w.user_id === userId && 
+                w.status === 'paid' && 
+                parseFloat(w.amount) > 0 && 
+                w.account_name !== 'ADDITION' && 
+                w.account_name !== 'DEDUCTION'
+            ).reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            
+            const pendingWithdrawals = withdrawals.filter(w => 
+                w.user_id === userId && 
+                w.status === 'pending' && 
+                parseFloat(w.amount) > 0 &&
+                w.account_name !== 'ADDITION' && 
+                w.account_name !== 'DEDUCTION'
+            ).reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            
+            // Deductions (negative amounts - violations)
+            const deductions = withdrawals.filter(w => 
+                w.user_id === userId && 
+                w.status === 'paid' && 
+                w.account_name === 'DEDUCTION'
+            ).reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            
+            // Additions (positive amounts - bonus)
+            const additions = withdrawals.filter(w => 
+                w.user_id === userId && 
+                w.status === 'paid' && 
+                w.account_name === 'ADDITION'
+            ).reduce((sum, w) => sum + parseFloat(w.amount), 0);
+            
+            let balance = totalEarnings - paidWithdrawals - pendingWithdrawals + additions + deductions;
+            
+            return {
+                totalEarnings,
+                paidWithdrawals,
+                pendingWithdrawals,
+                deductions: Math.abs(deductions),
+                additions,
+                balance
+            };
+        }
+
+        // ===== LOAD DATA =====
+        async function loadData() {
+            showResult('⏳ Loading...', 'loading');
+            try {
+                const [u, m, w] = await Promise.all([
+                    apiFetch('users?select=*'),
+                    apiFetch('messages?select=*'),
+                    apiFetch('withdrawals?select=*')
+                ]);
+                
+                users = u || [];
+                messages = m || [];
+                withdrawals = w || [];
+                
+                const select = document.getElementById('userSelect');
+                select.innerHTML = '<option value="">— Select User —</option>';
+                
+                users.forEach(user => {
+                    const option = document.createElement('option');
+                    option.value = user.id;
+                    const status = user.suspended ? '🚫' : '✅';
+                    option.textContent = `${user.username} (${user.role}) ${status}`;
+                    select.appendChild(option);
+                });
+                
+                renderUserList();
+                
+                const firstUser = users.find(u => u.username !== 'admin');
+                if (firstUser) {
+                    select.value = firstUser.id;
+                    selectUser(firstUser.id);
+                }
+                
+                showResult(`✅ Loaded ${users.length} users`, 'success');
+            } catch (e) {
+                showResult(`❌ Error: ${e.message}`, 'error');
+            }
+        }
+
+        // ===== SELECT USER =====
+        function selectUser(userId) {
+            selectedUserId = userId;
+            const user = users.find(u => u.id === userId);
+            if (!user) return;
+            
+            const info = document.getElementById('userInfo');
+            info.classList.add('show');
+            
+            document.getElementById('displayUsername').textContent = user.username;
+            document.getElementById('displayRole').textContent = user.role;
+            
+            const statusEl = document.getElementById('displayStatus');
+            if (user.suspended) {
+                statusEl.innerHTML = '<span class="status-badge suspended">🚫 Suspended</span>';
+                document.getElementById('reasonRow').style.display = 'flex';
+                document.getElementById('displayReason').textContent = user.suspension_reason || 'No reason';
+            } else {
+                statusEl.innerHTML = '<span class="status-badge active">✅ Active</span>';
+                document.getElementById('reasonRow').style.display = 'none';
+            }
+            
+            const stats = calculateBalance(userId);
+            document.getElementById('displayBalance').textContent = `$${stats.balance.toFixed(2)}`;
+            document.getElementById('displayOtps').textContent = messages.filter(m => m.user_id === userId).length;
+            
+            renderDeductionHistory(userId);
+            renderAdditionHistory(userId);
+            renderWithdrawalHistory(userId);
+            
+            renderUserList();
+        }
+
+        // ===== RENDER DEDUCTION HISTORY =====
+        function renderDeductionHistory(userId) {
+            const container = document.getElementById('deductionList');
+            const items = withdrawals
+                .filter(w => w.user_id === userId && w.account_name === 'DEDUCTION')
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 10);
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div style="color:#6b7280;font-size:0.85rem;">No deductions</div>';
+                return;
+            }
+            
+            container.innerHTML = items.map(w => {
+                const amount = Math.abs(parseFloat(w.amount));
+                const date = new Date(w.created_at).toLocaleDateString();
+                return `
+                    <div class="history-item deduction">
+                        <span>${w.note || 'Violation penalty'}</span>
+                        <span>
+                            <span class="amount negative">-$${amount.toFixed(2)}</span>
+                            <span class="date">${date}</span>
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== RENDER ADDITION HISTORY =====
+        function renderAdditionHistory(userId) {
+            const container = document.getElementById('additionList');
+            const items = withdrawals
+                .filter(w => w.user_id === userId && w.account_name === 'ADDITION')
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 10);
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div style="color:#6b7280;font-size:0.85rem;">No additions</div>';
+                return;
+            }
+            
+            container.innerHTML = items.map(w => {
+                const amount = parseFloat(w.amount);
+                const date = new Date(w.created_at).toLocaleDateString();
+                return `
+                    <div class="history-item addition">
+                        <span>${w.note || 'Bonus'}</span>
+                        <span>
+                            <span class="amount positive">+$${amount.toFixed(2)}</span>
+                            <span class="date">${date}</span>
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== RENDER WITHDRAWAL HISTORY (USER REQUESTS ONLY) =====
+        function renderWithdrawalHistory(userId) {
+            const container = document.getElementById('withdrawalList');
+            
+            // Filter: Only user withdrawals (not ADDITION or DEDUCTION)
+            const items = withdrawals
+                .filter(w => 
+                    w.user_id === userId && 
+                    parseFloat(w.amount) > 0 &&
+                    w.account_name !== 'ADDITION' && 
+                    w.account_name !== 'DEDUCTION'
+                )
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 10);
+            
+            if (items.length === 0) {
+                container.innerHTML = '<div style="color:#6b7280;font-size:0.85rem;">No withdrawal requests</div>';
+                return;
+            }
+            
+            container.innerHTML = items.map(w => {
+                const amount = parseFloat(w.amount);
+                const date = new Date(w.created_at).toLocaleDateString();
+                const status = w.status === 'paid' ? '✅ Paid' : '⏳ Pending';
+                const accountName = w.account_name || 'Withdrawal';
+                return `
+                    <div class="history-item withdrawal">
+                        <span>${accountName} - ${status}</span>
+                        <span>
+                            <span class="amount withdrawal-amount">$${amount.toFixed(2)}</span>
+                            <span class="date">${date}</span>
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== RENDER USER LIST =====
+        function renderUserList() {
+            const container = document.getElementById('userList');
+            if (!users || users.length === 0) {
+                container.innerHTML = '<div style="text-align:center;padding:20px;color:#6b7280;">No users</div>';
+                return;
+            }
+            
+            container.innerHTML = users.map(user => {
+                const isSelected = user.id === selectedUserId;
+                const stats = calculateBalance(user.id);
+                const status = user.suspended ? '🚫' : '✅';
+                return `
+                    <div class="user-item ${isSelected ? 'selected' : ''}" 
+                         onclick="document.getElementById('userSelect').value='${user.id}'; selectUser('${user.id}');">
+                        <span>${user.username} (${user.role})</span>
+                        <span>$${stats.balance.toFixed(2)} ${status}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== EXECUTE ACTION =====
+        async function executeAction() {
+            if (!selectedUserId) {
+                showResult('❌ Please select a user first', 'error');
+                return;
+            }
+            
+            const user = users.find(u => u.id === selectedUserId);
+            if (!user) return;
+            
+            const action = document.getElementById('actionSelect').value;
+            if (!action) {
+                showResult('❌ Please select an action', 'error');
+                return;
+            }
+            
+            const reason = document.getElementById('reasonInput').value.trim() || 'Admin action';
+            
+            showResult(`⏳ Executing: ${action} on ${user.username}...`, 'loading');
+            
+            try {
+                let result;
+                switch(action) {
+                    case 'suspend':
+                        if (user.suspended) {
+                            showResult(`⚠️ ${user.username} is already suspended`, 'error');
+                            return;
+                        }
+                        if (user.username === 'admin') {
+                            showResult('❌ Cannot suspend admin', 'error');
+                            return;
+                        }
+                        result = await apiFetch(`users?id=eq.${user.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ suspended: true, suspension_reason: reason })
+                        });
+                        showResult(`✅ ${user.username} suspended successfully`, 'success');
+                        break;
+                        
+                    case 'unsuspend':
+                        if (!user.suspended) {
+                            showResult(`⚠️ ${user.username} is not suspended`, 'error');
+                            return;
+                        }
+                        result = await apiFetch(`users?id=eq.${user.id}`, {
+                            method: 'PATCH',
+                            body: JSON.stringify({ suspended: false, suspension_reason: null })
+                        });
+                        showResult(`✅ ${user.username} unsuspended successfully`, 'success');
+                        break;
+                        
+                    case 'deduct':
+                        const deductAmount = parseFloat(document.getElementById('amountInput').value);
+                        if (isNaN(deductAmount) || deductAmount <= 0) {
+                            showResult('❌ Enter valid amount', 'error');
+                            return;
+                        }
+                        const stats = calculateBalance(user.id);
+                        if (deductAmount > stats.balance) {
+                            showResult(`❌ Insufficient balance: $${stats.balance.toFixed(2)}`, 'error');
+                            return;
+                        }
+                        result = await apiFetch('withdrawals', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                user_id: user.id,
+                                amount: -Math.abs(deductAmount),
+                                account_name: 'DEDUCTION',
+                                account_number: 'VIOLATION_DEDUCTION',
+                                bank_name: 'ADMIN',
+                                status: 'paid',
+                                created_at: new Date().toISOString(),
+                                note: reason
+                            })
+                        });
+                        showResult(`✅ $${deductAmount.toFixed(2)} deducted from ${user.username}`, 'success');
+                        break;
+                        
+                    case 'add':
+                        const addAmount = parseFloat(document.getElementById('amountInput').value);
+                        if (isNaN(addAmount) || addAmount <= 0) {
+                            showResult('❌ Enter valid amount', 'error');
+                            return;
+                        }
+                        result = await apiFetch('withdrawals', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                user_id: user.id,
+                                amount: Math.abs(addAmount),
+                                account_name: 'ADDITION',
+                                account_number: 'BONUS_ADDITION',
+                                bank_name: 'ADMIN',
+                                status: 'paid',
+                                created_at: new Date().toISOString(),
+                                note: reason
+                            })
+                        });
+                        showResult(`✅ $${addAmount.toFixed(2)} added to ${user.username}`, 'success');
+                        break;
+                        
+                    default:
+                        showResult('❌ Unknown action', 'error');
+                        return;
+                }
+                
+                await loadData();
+                document.getElementById('userSelect').value = user.id;
+                selectUser(user.id);
+                
+            } catch (e) {
+                showResult(`❌ Error: ${e.message}`, 'error');
+            }
+        }
+
+        // ===== SHOW RESULT =====
+        function showResult(message, type) {
+            const el = document.getElementById('result');
+            el.textContent = message;
+            el.className = `result ${type}`;
+        }
+
+        // ===== SHOW/HIDE FIELDS =====
+        document.getElementById('actionSelect').addEventListener('change', function() {
+            const action = this.value;
+            const reasonGroup = document.getElementById('reasonGroup');
+            const amountGroup = document.getElementById('amountGroup');
+            
+            if (action === 'suspend' || action === 'unsuspend') {
+                reasonGroup.classList.remove('hidden');
+                amountGroup.classList.add('hidden');
+                document.getElementById('reasonInput').placeholder = 'Enter reason...';
+            } else if (action === 'deduct' || action === 'add') {
+                reasonGroup.classList.remove('hidden');
+                amountGroup.classList.remove('hidden');
+                document.getElementById('reasonInput').placeholder = 'Enter reason for transaction...';
+            } else {
+                reasonGroup.classList.add('hidden');
+                amountGroup.classList.add('hidden');
+            }
+        });
+
+        // ===== EVENT LISTENERS =====
+        document.getElementById('userSelect').addEventListener('change', function() {
+            if (this.value) {
+                selectUser(this.value);
+            } else {
+                document.getElementById('userInfo').classList.remove('show');
+                selectedUserId = null;
+            }
+        });
+
+        // ===== LOAD ON START =====
+        loadData();
+    </script>
+</body>
+</html>
